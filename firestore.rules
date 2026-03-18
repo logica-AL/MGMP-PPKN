@@ -1,0 +1,268 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: profiles
+    // Document ID: {uid}
+    // Fields:
+    //   - uid: string (required)
+    //   - email: string (required)
+    //   - name: string (required)
+    //   - role: string (admin/teacher) (required)
+    //   - isVerified: bool (required)
+    //
+    // Collection: news
+    // Document ID: {newsId}
+    // Fields:
+    //   - title: string (required)
+    //   - content: string (required)
+    //   - imageUrl: string (required)
+    //   - authorId: string (required)
+    //   - authorName: string (required)
+    //   - createdAt: timestamp (required)
+    //   - isApproved: bool (required)
+    //
+    // Collection: events
+    // Document ID: {eventId}
+    // Fields:
+    //   - title: string (required)
+    //   - description: string (required)
+    //   - date: timestamp (required)
+    //   - authorId: string (required)
+    //   - authorName: string (required)
+    //   - createdAt: timestamp (required)
+    //   - isApproved: bool (required)
+    //
+    // Collection: materials
+    // Document ID: {materialId}
+    // Fields:
+    //   - title: string (required)
+    //   - fileUrl: string (required)
+    //   - authorId: string (required)
+    //   - authorName: string (required)
+    //   - createdAt: timestamp (required)
+    //   - isApproved: bool (required)
+    //
+    // Collection: settings
+    // Document ID: {settingId}
+    // Fields:
+    //   - vision: string (required)
+    //   - mission: list (required)
+    //   - heroBackground: string (required)
+    //   - history: string (optional)
+    //
+    // Collection: staff
+    // Document ID: {staffId}
+    // Fields:
+    //   - name: string (required)
+    //   - position: string (required)
+    //   - imageUrl: string (required)
+    //   - order: int (required)
+    //
+    // Collection: documentation
+    // Document ID: {docId}
+    // Fields:
+    //   - title: string (required)
+    //   - description: string (required)
+    //   - imageUrl: string (required)
+    //   - authorId: string (required)
+    //   - authorName: string (required)
+    //   - createdAt: timestamp (required)
+    //   - isApproved: bool (required)
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return isAuthenticated() && request.auth.uid == uid;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && (
+        request.auth.token.email == "logicafalfa21@gmail.com" || 
+        (exists(/databases/$(database)/documents/profiles/$(request.auth.uid)) && 
+         get(/databases/$(database)/documents/profiles/$(request.auth.uid)).data.role == 'admin')
+      );
+    }
+
+    function isVerifiedTeacher() {
+      return isAuthenticated() && 
+        exists(/databases/$(database)/documents/profiles/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/profiles/$(request.auth.uid)).data.role == 'teacher' && 
+        get(/databases/$(database)/documents/profiles/$(request.auth.uid)).data.isVerified == true;
+    }
+
+    function isVerifiedOrAdmin() {
+      return isAdmin() || isVerifiedTeacher();
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    function isValidEmail(email) {
+      return email is string && email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    // ===============================================================
+    // Collection Rules
+    // ===============================================================
+
+    match /profiles/{uid} {
+      function isValidProfile(data) {
+        return data.uid is string &&
+               data.email is string && isValidEmail(data.email) &&
+               data.name is string && data.name.size() > 0 && data.name.size() < 100 &&
+               data.role in ['admin', 'teacher'] &&
+               data.isVerified is bool &&
+               (!('school' in data) || (data.school is string && data.school.size() < 200));
+      }
+
+      allow read: if isOwner(uid) || isAdmin();
+      allow list: if isAdmin();
+      allow create: if isOwner(uid) && 
+                      isValidProfile(request.resource.data) &&
+                      (
+                        (request.auth.token.email == "logicafalfa21@gmail.com" && request.resource.data.role == 'admin' && request.resource.data.isVerified == true) ||
+                        (request.resource.data.role == 'teacher' && request.resource.data.isVerified == false)
+                      );
+      allow update: if isAdmin() || 
+                      (isOwner(uid) && 
+                       isValidProfile(request.resource.data) &&
+                       request.resource.data.role == resource.data.role &&
+                       request.resource.data.isVerified == resource.data.isVerified);
+      allow delete: if isAdmin();
+    }
+
+    match /news/{newsId} {
+      function isValidNews(data) {
+        return data.title is string && data.title.size() > 0 && data.title.size() < 200 &&
+               data.content is string && data.content.size() > 0 &&
+               data.imageUrl is string &&
+               data.authorId is string &&
+               data.authorName is string &&
+               data.createdAt is timestamp &&
+               data.isApproved is bool;
+      }
+
+      allow read: if resource.data.isApproved == true || isAdmin() || (isAuthenticated() && request.auth.uid == resource.data.authorId);
+      allow create: if isVerifiedOrAdmin() && 
+                      isValidNews(request.resource.data) &&
+                      request.resource.data.authorId == request.auth.uid &&
+                      (isAdmin() || request.resource.data.isApproved == false);
+      allow update: if isAdmin() || 
+                      (isOwner(resource.data.authorId) && 
+                       isValidNews(request.resource.data) &&
+                       request.resource.data.authorId == resource.data.authorId &&
+                       (isAdmin() || request.resource.data.isApproved == resource.data.isApproved));
+      allow delete: if isAdmin() || isOwner(resource.data.authorId);
+    }
+
+    match /events/{eventId} {
+      function isValidEvent(data) {
+        return data.title is string && data.title.size() > 0 &&
+               data.description is string &&
+               data.date is timestamp &&
+               data.authorId is string &&
+               data.authorName is string &&
+               data.createdAt is timestamp &&
+               data.isApproved is bool;
+      }
+
+      allow read: if resource.data.isApproved == true || isAdmin() || (isAuthenticated() && request.auth.uid == resource.data.authorId);
+      allow create: if isVerifiedOrAdmin() && 
+                      isValidEvent(request.resource.data) &&
+                      request.resource.data.authorId == request.auth.uid &&
+                      (isAdmin() || request.resource.data.isApproved == false);
+      allow update: if isAdmin() || 
+                      (isOwner(resource.data.authorId) && 
+                       isValidEvent(request.resource.data) &&
+                       request.resource.data.authorId == resource.data.authorId &&
+                       (isAdmin() || request.resource.data.isApproved == resource.data.isApproved));
+      allow delete: if isAdmin() || isOwner(resource.data.authorId);
+    }
+
+    match /materials/{materialId} {
+      function isValidMaterial(data) {
+        return data.title is string && data.title.size() > 0 &&
+               data.fileUrl is string &&
+               data.authorId is string &&
+               data.authorName is string &&
+               data.createdAt is timestamp &&
+               data.isApproved is bool;
+      }
+
+      allow read: if resource.data.isApproved == true || isAdmin() || (isAuthenticated() && request.auth.uid == resource.data.authorId);
+      allow create: if isVerifiedOrAdmin() && 
+                      isValidMaterial(request.resource.data) &&
+                      request.resource.data.authorId == request.auth.uid &&
+                      (isAdmin() || request.resource.data.isApproved == false);
+      allow update: if isAdmin() || 
+                      (isOwner(resource.data.authorId) && 
+                       isValidMaterial(request.resource.data) &&
+                       request.resource.data.authorId == resource.data.authorId &&
+                       (isAdmin() || request.resource.data.isApproved == resource.data.isApproved));
+      allow delete: if isAdmin() || isOwner(resource.data.authorId);
+    }
+
+    match /settings/{settingId} {
+      function isValidSettings(data) {
+        return data.vision is string &&
+               data.mission is list &&
+               data.heroBackground is string &&
+               (!('history' in data) || data.history is string);
+      }
+
+      allow read: if true;
+      allow create, update: if isAdmin() && isValidSettings(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    match /staff/{staffId} {
+      function isValidStaff(data) {
+        return data.name is string && data.name.size() > 0 &&
+               data.position is string &&
+               data.imageUrl is string &&
+               data.order is int;
+      }
+
+      allow read: if true;
+      allow create, update: if isAdmin() && isValidStaff(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    match /documentation/{docId} {
+      function isValidDocumentation(data) {
+        return data.title is string && data.title.size() > 0 &&
+               data.description is string &&
+               data.imageUrl is string &&
+               data.authorId is string &&
+               data.authorName is string &&
+               data.createdAt is timestamp &&
+               data.isApproved is bool;
+      }
+
+      allow read: if resource.data.isApproved == true || isAdmin() || (isAuthenticated() && request.auth.uid == resource.data.authorId);
+      allow create: if isVerifiedOrAdmin() && 
+                      isValidDocumentation(request.resource.data) &&
+                      request.resource.data.authorId == request.auth.uid &&
+                      (isAdmin() || request.resource.data.isApproved == false);
+      allow update: if isAdmin() || 
+                      (isOwner(resource.data.authorId) && 
+                       isValidDocumentation(request.resource.data) &&
+                       request.resource.data.authorId == resource.data.authorId &&
+                       (isAdmin() || request.resource.data.isApproved == resource.data.isApproved));
+      allow delete: if isAdmin() || isOwner(resource.data.authorId);
+    }
+  }
+}
