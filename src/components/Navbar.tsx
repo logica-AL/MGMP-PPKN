@@ -38,9 +38,9 @@ const Navbar: React.FC = () => {
                 referrerPolicy="no-referrer"
               />
               <div className="ml-3 flex flex-col">
-                <span className="text-xl font-bold text-slate-900 leading-none">MGMP</span>
+                <span className="text-xl font-bold text-slate-900 leading-none">MGMP PPKN</span>
                 <span className="text-[10px] font-medium text-slate-500 hidden sm:block uppercase tracking-tight">
-                  Pendidikan Pancasila SMP Kab. Mojokerto
+                  SMP MOJOKERTO
                 </span>
               </div>
             </Link>

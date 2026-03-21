@@ -39,7 +39,7 @@ const Home: React.FC = () => {
     };
   }, []);
 
-  const heroBg = settings?.heroBackground || "https://lh3.googleusercontent.com/d/1LjWVqwK3hSjQJS_XaA18nF825EeIdfPD";
+  const heroBg = settings?.heroBackground || "https://drive.google.com/file/d/1YlpLa1aba-q0gGyVzLVoL7m5D028fHWR/view?usp=sharing";
 
   return (
     <div className="space-y-20 pb-20">
@@ -63,10 +63,10 @@ const Home: React.FC = () => {
             />
           </div>
           <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 tracking-tight">
-            MGMP Pendidikan Pancasila
+            MGMP PPKN SMP MOJOKERTO
           </h1>
           <p className="text-lg md:text-xl text-slate-300 mb-10 max-w-2xl mx-auto">
-            Wadah kolaborasi dan peningkatan profesionalisme guru Pendidikan Pancasila SMP Kabupaten Mojokerto.
+            Wadah kolaborasi dan peningkatan profesionalisme guru PPKN SMP Kabupaten Mojokerto.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4">
             <Link
