@@ -30,6 +30,7 @@ service cloud.firestore {
     // Fields:
     //   - title: string (required)
     //   - description: string (required)
+    //   - location: string (required)
     //   - date: timestamp (required)
     //   - authorId: string (required)
     //   - authorName: string (required)
@@ -67,7 +68,7 @@ service cloud.firestore {
     // Fields:
     //   - title: string (required)
     //   - description: string (required)
-    //   - imageUrl: string (required)
+    //   - imageUrls: list (required)
     //   - authorId: string (required)
     //   - authorName: string (required)
     //   - createdAt: timestamp (required)
@@ -89,9 +90,10 @@ service cloud.firestore {
 
     function isAdmin() {
       return isAuthenticated() && (
-        request.auth.token.email == "logicafalfa21@gmail.com" || 
+        (request.auth.token.email == "logicafalfa21@gmail.com" && request.auth.token.email_verified == true) || 
         (exists(/databases/$(database)/documents/profiles/$(request.auth.uid)) && 
-         get(/databases/$(database)/documents/profiles/$(request.auth.uid)).data.role == 'admin')
+         get(/databases/$(database)/documents/profiles/$(request.auth.uid)).data.role == 'admin' &&
+         request.auth.token.email_verified == true)
       );
     }
 
@@ -119,8 +121,8 @@ service cloud.firestore {
     // ===============================================================
 
     match /profiles/{uid} {
-      function isValidProfile(data) {
-        return data.uid is string &&
+      function isValidProfile(data, uid) {
+        return data.uid is string && data.uid == uid &&
                data.email is string && isValidEmail(data.email) &&
                data.name is string && data.name.size() > 0 && data.name.size() < 100 &&
                data.role in ['admin', 'teacher'] &&
@@ -131,32 +133,32 @@ service cloud.firestore {
       allow read: if isOwner(uid) || isAdmin();
       allow list: if isAdmin();
       allow create: if isOwner(uid) && 
-                      isValidProfile(request.resource.data) &&
+                      isValidProfile(request.resource.data, uid) &&
                       (
                         (request.auth.token.email == "logicafalfa21@gmail.com" && request.resource.data.role == 'admin' && request.resource.data.isVerified == true) ||
                         (request.resource.data.role == 'teacher' && request.resource.data.isVerified == false)
                       );
-      allow update: if isAdmin() || 
-                      (isOwner(uid) && 
-                       isValidProfile(request.resource.data) &&
-                       request.resource.data.role == resource.data.role &&
-                       request.resource.data.isVerified == resource.data.isVerified);
+      allow update: if isAuthenticated() && isValidProfile(request.resource.data, uid) && 
+                      (isAdmin() || 
+                       (isOwner(uid) && 
+                        request.resource.data.role == resource.data.role &&
+                        request.resource.data.isVerified == resource.data.isVerified));
       allow delete: if isAdmin();
     }
 
     match /news/{newsId} {
       function isValidNews(data) {
         return data.title is string && data.title.size() > 0 && data.title.size() < 200 &&
-               data.content is string && data.content.size() > 0 &&
-               data.imageUrl is string &&
+               data.content is string && data.content.size() > 0 && data.content.size() < 10000 &&
+               data.imageUrl is string && data.imageUrl.size() < 1000 &&
                data.authorId is string &&
-               data.authorName is string &&
+               data.authorName is string && data.authorName.size() < 100 &&
                data.createdAt is timestamp &&
                data.isApproved is bool;
       }
 
       allow read: if resource.data.isApproved == true || isAdmin() || (isAuthenticated() && request.auth.uid == resource.data.authorId);
-      allow create: if isVerifiedOrAdmin() && 
+      allow create: if isAuthenticated() && 
                       isValidNews(request.resource.data) &&
                       request.resource.data.authorId == request.auth.uid &&
                       (isAdmin() || request.resource.data.isApproved == false);
@@ -170,17 +172,18 @@ service cloud.firestore {
 
     match /events/{eventId} {
       function isValidEvent(data) {
-        return data.title is string && data.title.size() > 0 &&
-               data.description is string &&
+        return data.title is string && data.title.size() > 0 && data.title.size() < 200 &&
+               data.description is string && data.description.size() < 5000 &&
+               data.location is string && data.location.size() < 500 &&
                data.date is timestamp &&
                data.authorId is string &&
-               data.authorName is string &&
+               data.authorName is string && data.authorName.size() < 100 &&
                data.createdAt is timestamp &&
                data.isApproved is bool;
       }
 
       allow read: if resource.data.isApproved == true || isAdmin() || (isAuthenticated() && request.auth.uid == resource.data.authorId);
-      allow create: if isVerifiedOrAdmin() && 
+      allow create: if isAuthenticated() && 
                       isValidEvent(request.resource.data) &&
                       request.resource.data.authorId == request.auth.uid &&
                       (isAdmin() || request.resource.data.isApproved == false);
@@ -194,16 +197,17 @@ service cloud.firestore {
 
     match /materials/{materialId} {
       function isValidMaterial(data) {
-        return data.title is string && data.title.size() > 0 &&
-               data.fileUrl is string &&
+        return data.title is string && data.title.size() > 0 && data.title.size() < 200 &&
+               data.fileUrl is string && data.fileUrl.size() < 1000 &&
+               (!('description' in data) || (data.description is string && data.description.size() < 5000)) &&
                data.authorId is string &&
-               data.authorName is string &&
+               data.authorName is string && data.authorName.size() < 100 &&
                data.createdAt is timestamp &&
                data.isApproved is bool;
       }
 
       allow read: if resource.data.isApproved == true || isAdmin() || (isAuthenticated() && request.auth.uid == resource.data.authorId);
-      allow create: if isVerifiedOrAdmin() && 
+      allow create: if isAuthenticated() && 
                       isValidMaterial(request.resource.data) &&
                       request.resource.data.authorId == request.auth.uid &&
                       (isAdmin() || request.resource.data.isApproved == false);
@@ -217,10 +221,10 @@ service cloud.firestore {
 
     match /settings/{settingId} {
       function isValidSettings(data) {
-        return data.vision is string &&
-               data.mission is list &&
-               data.heroBackground is string &&
-               (!('history' in data) || data.history is string);
+        return data.vision is string && data.vision.size() < 5000 &&
+               data.mission is list && data.mission.size() <= 20 &&
+               data.heroBackground is string && data.heroBackground.size() < 1000 &&
+               (!('history' in data) || (data.history is string && data.history.size() < 10000));
       }
 
       allow read: if true;
@@ -230,9 +234,9 @@ service cloud.firestore {
 
     match /staff/{staffId} {
       function isValidStaff(data) {
-        return data.name is string && data.name.size() > 0 &&
-               data.position is string &&
-               data.imageUrl is string &&
+        return data.name is string && data.name.size() > 0 && data.name.size() < 100 &&
+               data.position is string && data.position.size() < 100 &&
+               data.imageUrl is string && data.imageUrl.size() < 1000 &&
                data.order is int;
       }
 
@@ -243,17 +247,17 @@ service cloud.firestore {
 
     match /documentation/{docId} {
       function isValidDocumentation(data) {
-        return data.title is string && data.title.size() > 0 &&
-               data.description is string &&
-               data.imageUrl is string &&
+        return data.title is string && data.title.size() > 0 && data.title.size() < 200 &&
+               data.description is string && data.description.size() < 5000 &&
+               data.imageUrls is list && data.imageUrls.size() <= 20 &&
                data.authorId is string &&
-               data.authorName is string &&
+               data.authorName is string && data.authorName.size() < 100 &&
                data.createdAt is timestamp &&
                data.isApproved is bool;
       }
 
       allow read: if resource.data.isApproved == true || isAdmin() || (isAuthenticated() && request.auth.uid == resource.data.authorId);
-      allow create: if isVerifiedOrAdmin() && 
+      allow create: if isAuthenticated() && 
                       isValidDocumentation(request.resource.data) &&
                       request.resource.data.authorId == request.auth.uid &&
                       (isAdmin() || request.resource.data.isApproved == false);

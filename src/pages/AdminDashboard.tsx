@@ -323,6 +323,23 @@ const AdminDashboard: React.FC = () => {
     }
   };
 
+  const handleToggleAdmin = async (uid: string, currentRole: string) => {
+    if (uid === profile?.uid) {
+      showToast('Anda tidak dapat mengubah role Anda sendiri', 'error');
+      return;
+    }
+    
+    const path = `profiles/${uid}`;
+    const newRole = currentRole === 'admin' ? 'teacher' : 'admin';
+    try {
+      await updateDoc(doc(db, 'profiles', uid), { role: newRole });
+      showToast(`User berhasil diubah menjadi ${newRole}`);
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, path);
+      showToast('Gagal mengubah role user', 'error');
+    }
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 py-12 space-y-12">
       {toast && (
@@ -616,6 +633,7 @@ const AdminDashboard: React.FC = () => {
               <table className="w-full text-left">
                 <thead className="bg-slate-50 text-slate-500 text-xs font-bold uppercase tracking-wider">
                   <tr>
+                    <th className="px-6 py-4">Foto</th>
                     <th className="px-6 py-4">Judul</th>
                     <th className="px-6 py-4">Penulis</th>
                     <th className="px-6 py-4">Tanggal Upload</th>
@@ -626,6 +644,24 @@ const AdminDashboard: React.FC = () => {
                   {pendingDocs.length > 0 ? (
                     pendingDocs.map((doc) => (
                       <tr key={doc.id} className="hover:bg-slate-50 transition-colors">
+                        <td className="px-6 py-4">
+                          <div className="flex -space-x-2 overflow-hidden">
+                            {doc.imageUrls?.slice(0, 3).map((url, idx) => (
+                              <img
+                                key={idx}
+                                className="inline-block h-8 w-8 rounded-full ring-2 ring-white object-cover"
+                                src={getDirectImageUrl(url)}
+                                alt=""
+                                referrerPolicy="no-referrer"
+                              />
+                            ))}
+                            {doc.imageUrls?.length > 3 && (
+                              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-[10px] font-bold text-slate-500 ring-2 ring-white">
+                                +{doc.imageUrls.length - 3}
+                              </div>
+                            )}
+                          </div>
+                        </td>
                         <td className="px-6 py-4 font-medium text-slate-900">{doc.title}</td>
                         <td className="px-6 py-4 text-slate-500">{doc.authorName}</td>
                         <td className="px-6 py-4 text-slate-500">{formatDate(doc.createdAt)}</td>
@@ -1023,14 +1059,28 @@ const AdminDashboard: React.FC = () => {
                         {user.isVerified ? 'Terverifikasi' : 'Pending'}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-6 py-4 text-right space-x-2">
                       {user.uid !== profile?.uid && (
-                        <button
-                          onClick={() => handleDeleteUser(user.uid)}
-                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                        <>
+                          <button
+                            onClick={() => handleToggleAdmin(user.uid, user.role)}
+                            className={`p-2 rounded-lg transition-colors ${
+                              user.role === 'admin' 
+                                ? 'text-amber-600 hover:bg-amber-50' 
+                                : 'text-purple-600 hover:bg-purple-50'
+                            }`}
+                            title={user.role === 'admin' ? 'Jadikan Guru' : 'Jadikan Admin'}
+                          >
+                            <UserCheck className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteUser(user.uid)}
+                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            title="Hapus User"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </>
                       )}
                     </td>
                   </tr>

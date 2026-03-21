@@ -46,7 +46,7 @@ const Events: React.FC = () => {
                     </div>
                     <div className="flex items-center">
                       <MapPin className="w-4 h-4 mr-2 text-slate-400" />
-                      {event.description.length > 50 ? event.description.substring(0, 50) + '...' : event.description}
+                      {event.location}
                     </div>
                   </div>
                 </div>

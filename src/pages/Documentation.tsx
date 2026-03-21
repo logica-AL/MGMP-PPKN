@@ -3,12 +3,13 @@ import { collection, query, where, orderBy, onSnapshot } from 'firebase/firestor
 import { db } from '../firebase';
 import { Documentation as DocumentationType } from '../types';
 import { formatDate, handleFirestoreError, OperationType, getDirectImageUrl } from '../utils';
-import { Camera, Calendar, User, X } from 'lucide-react';
+import { Camera, Calendar, User, X, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const Documentation: React.FC = () => {
   const [docs, setDocs] = useState<DocumentationType[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedDoc, setSelectedDoc] = useState<DocumentationType | null>(null);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
 
   useEffect(() => {
     const path = 'documentation';
@@ -29,6 +30,25 @@ const Documentation: React.FC = () => {
 
     return () => unsubscribe();
   }, []);
+
+  const openModal = (doc: DocumentationType) => {
+    setSelectedDoc(doc);
+    setActiveImageIndex(0);
+  };
+
+  const nextImage = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (selectedDoc?.imageUrls) {
+      setActiveImageIndex((prev) => (prev + 1) % selectedDoc.imageUrls.length);
+    }
+  };
+  
+  const prevImage = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (selectedDoc?.imageUrls) {
+      setActiveImageIndex((prev) => (prev - 1 + selectedDoc.imageUrls.length) % selectedDoc.imageUrls.length);
+    }
+  };
 
   if (loading) {
     return (
@@ -52,19 +72,19 @@ const Documentation: React.FC = () => {
           docs.map((doc) => (
             <div 
               key={doc.id} 
-              onClick={() => setSelectedDoc(doc)}
+              onClick={() => openModal(doc)}
               className="bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-100 flex flex-col group cursor-pointer hover:shadow-md transition-shadow"
             >
               <div className="h-64 overflow-hidden relative">
                 <img
-                  src={getDirectImageUrl(doc.imageUrl) || `https://picsum.photos/seed/${doc.id}/800/600`}
+                  src={getDirectImageUrl(doc.imageUrls?.[0]) || `https://picsum.photos/seed/${doc.id}/800/600`}
                   alt={doc.title}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   referrerPolicy="no-referrer"
                 />
                 <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full flex items-center text-xs font-bold text-slate-900 shadow-sm">
                   <Camera className="w-3 h-3 mr-1" />
-                  Foto
+                  {doc.imageUrls?.length || 0} Foto
                 </div>
               </div>
               <div className="p-8 flex-grow flex flex-col">
@@ -102,7 +122,7 @@ const Documentation: React.FC = () => {
             className="absolute inset-0 bg-slate-900/80 backdrop-blur-sm"
             onClick={() => setSelectedDoc(null)}
           ></div>
-          <div className="bg-white w-full max-w-4xl max-h-[90vh] rounded-3xl overflow-hidden shadow-2xl relative z-10 flex flex-col md:flex-row">
+          <div className="bg-white w-full max-w-5xl max-h-[90vh] rounded-3xl overflow-hidden shadow-2xl relative z-10 flex flex-col md:flex-row">
             <button 
               onClick={() => setSelectedDoc(null)}
               className="absolute top-4 right-4 p-2 bg-white/20 hover:bg-white/40 backdrop-blur-md text-white md:text-slate-900 md:bg-slate-100 md:hover:bg-slate-200 rounded-full transition-colors z-20"
@@ -110,13 +130,56 @@ const Documentation: React.FC = () => {
               <X className="w-6 h-6" />
             </button>
 
-            <div className="w-full md:w-3/5 h-64 md:h-auto overflow-hidden bg-slate-100">
-              <img
-                src={getDirectImageUrl(selectedDoc.imageUrl) || `https://picsum.photos/seed/${selectedDoc.id}/1200/800`}
-                alt={selectedDoc.title}
-                className="w-full h-full object-cover"
-                referrerPolicy="no-referrer"
-              />
+            <div className="w-full md:w-3/5 h-[40vh] md:h-auto overflow-hidden bg-slate-100 relative flex flex-col">
+              <div className="flex-grow relative group/modal">
+                <img
+                  src={getDirectImageUrl(selectedDoc.imageUrls?.[activeImageIndex]) || `https://picsum.photos/seed/${selectedDoc.id}-${activeImageIndex}/1200/800`}
+                  alt={selectedDoc.title}
+                  className="w-full h-full object-contain bg-slate-900"
+                  referrerPolicy="no-referrer"
+                />
+                
+                {selectedDoc.imageUrls && selectedDoc.imageUrls.length > 1 && (
+                  <>
+                    <button 
+                      onClick={prevImage}
+                      className="absolute left-4 top-1/2 -translate-y-1/2 p-2 bg-black/50 hover:bg-black/70 text-white rounded-full transition-colors opacity-0 group-hover/modal:opacity-100"
+                    >
+                      <ChevronLeft className="w-6 h-6" />
+                    </button>
+                    <button 
+                      onClick={nextImage}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 p-2 bg-black/50 hover:bg-black/70 text-white rounded-full transition-colors opacity-0 group-hover/modal:opacity-100"
+                    >
+                      <ChevronRight className="w-6 h-6" />
+                    </button>
+                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-3 py-1 bg-black/50 backdrop-blur-sm rounded-full text-white text-xs font-bold">
+                      {activeImageIndex + 1} / {selectedDoc.imageUrls.length}
+                    </div>
+                  </>
+                )}
+              </div>
+              
+              {selectedDoc.imageUrls && selectedDoc.imageUrls.length > 1 && (
+                <div className="p-4 bg-white border-t border-slate-100 overflow-x-auto">
+                  <div className="flex gap-2">
+                    {selectedDoc.imageUrls.map((url, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => setActiveImageIndex(idx)}
+                        className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${activeImageIndex === idx ? 'border-blue-600' : 'border-transparent opacity-60 hover:opacity-100'}`}
+                      >
+                        <img
+                          src={getDirectImageUrl(url)}
+                          alt={`Thumbnail ${idx}`}
+                          className="w-full h-full object-cover"
+                          referrerPolicy="no-referrer"
+                        />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="w-full md:w-2/5 p-8 md:p-10 overflow-y-auto flex flex-col">

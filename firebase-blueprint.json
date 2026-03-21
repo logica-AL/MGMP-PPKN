@@ -42,7 +42,7 @@
         "createdAt": { "type": "string", "format": "date-time" },
         "isApproved": { "type": "boolean" }
       },
-      "required": ["title", "description", "date", "authorId", "authorName", "createdAt", "isApproved"]
+      "required": ["title", "description", "date", "location", "authorId", "authorName", "createdAt", "isApproved"]
     },
     "Material": {
       "title": "Educational Material",
@@ -90,13 +90,13 @@
       "properties": {
         "title": { "type": "string" },
         "description": { "type": "string" },
-        "imageUrl": { "type": "string", "format": "uri" },
+        "imageUrls": { "type": "array", "items": { "type": "string", "format": "uri" } },
         "authorId": { "type": "string" },
         "authorName": { "type": "string" },
         "createdAt": { "type": "string", "format": "date-time" },
         "isApproved": { "type": "boolean" }
       },
-      "required": ["title", "description", "imageUrl", "authorId", "authorName", "createdAt", "isApproved"]
+      "required": ["title", "description", "imageUrls", "authorId", "authorName", "createdAt", "isApproved"]
     }
   },
   "firestore": {

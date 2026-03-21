@@ -69,18 +69,19 @@ const EventDetail: React.FC = () => {
               <User className="w-4 h-4 mr-2 text-slate-400" />
               Oleh: {event.authorName}
             </div>
+            <div className="flex items-center">
+              <MapPin className="w-4 h-4 mr-2 text-slate-400" />
+              Lokasi: {event.location}
+            </div>
           </div>
         </div>
 
         <div className="bg-white rounded-3xl p-8 md:p-12 shadow-sm border border-slate-100 space-y-8">
-          <div className="flex items-start gap-4">
-            <MapPin className="w-6 h-6 text-blue-600 flex-shrink-0 mt-1" />
-            <div className="space-y-2">
-              <h3 className="text-lg font-bold text-slate-900">Deskripsi Acara</h3>
-              <p className="text-slate-600 leading-relaxed whitespace-pre-wrap">
-                {event.description}
-              </p>
-            </div>
+          <div className="space-y-4">
+            <h3 className="text-lg font-bold text-slate-900">Deskripsi Acara</h3>
+            <p className="text-slate-600 leading-relaxed whitespace-pre-wrap">
+              {event.description}
+            </p>
           </div>
         </div>
 

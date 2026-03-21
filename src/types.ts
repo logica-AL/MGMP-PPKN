@@ -26,6 +26,7 @@ export interface TeacherEvent {
   id: string;
   title: string;
   description: string;
+  location: string;
   date: Timestamp;
   authorId: string;
   authorName: string;
@@ -63,7 +64,7 @@ export interface Documentation {
   id: string;
   title: string;
   description: string;
-  imageUrl: string;
+  imageUrls: string[];
   authorId: string;
   authorName: string;
   createdAt: Timestamp;

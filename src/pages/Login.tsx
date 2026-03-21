@@ -23,7 +23,7 @@ const Login: React.FC = () => {
       navigate('/dashboard');
     } catch (err: any) {
       if (err.code === 'auth/invalid-credential') {
-        setError('Email atau password salah. Pastikan Anda sudah terdaftar atau coba masuk dengan Google.');
+        setError('Email atau password salah. Pastikan Anda sudah terdaftar.');
       } else if (err.code === 'auth/user-not-found') {
         setError('Akun tidak ditemukan. Silakan daftar terlebih dahulu.');
       } else if (err.code === 'auth/wrong-password') {
@@ -76,7 +76,7 @@ const Login: React.FC = () => {
       if (err.code === 'auth/popup-closed-by-user') {
         setError('Login dibatalkan. Silakan coba lagi.');
       } else if (err.code === 'auth/cancelled-popup-request') {
-        // Ignore this one, it happens if user clicks twice
+        // Ignore this one
       } else {
         setError('Gagal masuk dengan Google. Silakan coba lagi.');
         console.error(err);

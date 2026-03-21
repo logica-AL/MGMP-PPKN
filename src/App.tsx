@@ -17,6 +17,7 @@ import Dashboard from './pages/Dashboard';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from './firebase';
 import { handleFirestoreError, OperationType } from './utils';
+import { Toaster } from 'react-hot-toast';
 
 const BootstrapAdmin: React.FC = () => {
   const { user } = useAuth();
@@ -34,6 +35,7 @@ const BootstrapAdmin: React.FC = () => {
               name: 'Super Admin',
               role: 'admin',
               isVerified: true,
+              school: 'MGMP Kabupaten Mojokerto'
             });
           } else if (snap.data().role !== 'admin') {
             await setDoc(profileRef, { role: 'admin', isVerified: true }, { merge: true });
@@ -72,6 +74,7 @@ const AppRoutes: React.FC = () => {
 export default function App() {
   return (
     <AuthProvider>
+      <Toaster position="top-right" />
       <Router>
         <BootstrapAdmin />
         <Layout>

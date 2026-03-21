@@ -3,6 +3,8 @@ import { collection, addDoc, Timestamp } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../AuthContext';
 import { FileText, Calendar, BookOpen, Send, AlertCircle, CheckCircle, Camera } from 'lucide-react';
+import toast from 'react-hot-toast';
+import { handleFirestoreError, OperationType } from '../utils';
 
 const TeacherDashboard: React.FC = () => {
   const { profile } = useAuth();
@@ -14,13 +16,13 @@ const TeacherDashboard: React.FC = () => {
   const [newsForm, setNewsForm] = useState({ title: '', content: '', imageUrl: '' });
   const [eventForm, setEventForm] = useState({ title: '', description: '', date: '', location: '' });
   const [materialForm, setMaterialForm] = useState({ title: '', description: '', fileUrl: '' });
-  const [docForm, setDocForm] = useState({ title: '', description: '', imageUrl: '' });
+  const [docForm, setDocForm] = useState({ title: '', description: '', imageUrls: '' });
 
   const resetForms = () => {
     setNewsForm({ title: '', content: '', imageUrl: '' });
     setEventForm({ title: '', description: '', date: '', location: '' });
     setMaterialForm({ title: '', description: '', fileUrl: '' });
-    setDocForm({ title: '', description: '', imageUrl: '' });
+    setDocForm({ title: '', description: '', imageUrls: '' });
     setSuccess(false);
   };
 
@@ -37,9 +39,10 @@ const TeacherDashboard: React.FC = () => {
         isApproved: false
       });
       setSuccess(true);
+      toast.success('Berita berhasil dikirim untuk persetujuan');
       setNewsForm({ title: '', content: '', imageUrl: '' });
     } catch (err) {
-      console.error(err);
+      handleFirestoreError(err, OperationType.WRITE, 'news');
     } finally {
       setLoading(false);
     }
@@ -56,12 +59,13 @@ const TeacherDashboard: React.FC = () => {
         authorId: profile.uid,
         authorName: profile.name,
         createdAt: Timestamp.now(),
-        isApproved: false
+        isApproved: false // Events require admin approval
       });
       setSuccess(true);
+      toast.success('Acara berhasil dikirim untuk persetujuan');
       setEventForm({ title: '', description: '', date: '', location: '' });
     } catch (err) {
-      console.error(err);
+      handleFirestoreError(err, OperationType.WRITE, 'events');
     } finally {
       setLoading(false);
     }
@@ -77,12 +81,13 @@ const TeacherDashboard: React.FC = () => {
         authorId: profile.uid,
         authorName: profile.name,
         createdAt: Timestamp.now(),
-        isApproved: false
+        isApproved: false // Materials require admin approval
       });
       setSuccess(true);
+      toast.success('Materi berhasil dikirim untuk persetujuan');
       setMaterialForm({ title: '', description: '', fileUrl: '' });
     } catch (err) {
-      console.error(err);
+      handleFirestoreError(err, OperationType.WRITE, 'materials');
     } finally {
       setLoading(false);
     }
@@ -93,17 +98,32 @@ const TeacherDashboard: React.FC = () => {
     if (!profile?.isVerified) return;
     setLoading(true);
     try {
+      // Split URLs by comma, newline, semicolon or space and filter out empty strings
+      const urls = docForm.imageUrls
+        .split(/[\n,; ]+/)
+        .map(url => url.trim())
+        .filter(url => url !== '');
+
+      if (urls.length === 0) {
+        toast.error('Minimal satu URL foto diperlukan');
+        setLoading(false);
+        return;
+      }
+
       await addDoc(collection(db, 'documentation'), {
-        ...docForm,
+        title: docForm.title,
+        description: docForm.description,
+        imageUrls: urls,
         authorId: profile.uid,
         authorName: profile.name,
         createdAt: Timestamp.now(),
         isApproved: false
       });
       setSuccess(true);
-      setDocForm({ title: '', description: '', imageUrl: '' });
+      toast.success('Dokumentasi berhasil dikirim untuk persetujuan');
+      setDocForm({ title: '', description: '', imageUrls: '' });
     } catch (err) {
-      console.error(err);
+      handleFirestoreError(err, OperationType.WRITE, 'documentation');
     } finally {
       setLoading(false);
     }
@@ -347,14 +367,14 @@ const TeacherDashboard: React.FC = () => {
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-slate-700">URL Foto (Google Drive/Lainnya)</label>
-              <input
-                type="text"
+              <label className="text-sm font-semibold text-slate-700">URL Foto (Pisahkan dengan koma atau baris baru)</label>
+              <textarea
                 required
-                value={docForm.imageUrl}
-                onChange={(e) => setDocForm({ ...docForm, imageUrl: e.target.value })}
+                rows={3}
+                value={docForm.imageUrls}
+                onChange={(e) => setDocForm({ ...docForm, imageUrls: e.target.value })}
                 className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900"
-                placeholder="https://..."
+                placeholder="https://image1.jpg, https://image2.jpg"
               />
             </div>
             <div className="space-y-2">
