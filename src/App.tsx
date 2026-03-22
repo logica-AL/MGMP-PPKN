@@ -11,6 +11,7 @@ import News from './pages/News';
 import NewsDetail from './pages/NewsDetail';
 import Materials from './pages/Materials';
 import Documentation from './pages/Documentation';
+import BestPractices from './pages/BestPractices';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
@@ -24,7 +25,8 @@ const BootstrapAdmin: React.FC = () => {
 
   useEffect(() => {
     const checkAdmin = async () => {
-      if (user && user.email === 'logicafalfa21@gmail.com') {
+      const adminEmails = ['logicafalfa21@gmail.com', 'mgmppknmojokerto@gmail.com'];
+      if (user && user.email && adminEmails.includes(user.email)) {
         const profileRef = doc(db, 'profiles', user.uid);
         try {
           const snap = await getDoc(profileRef);
@@ -62,6 +64,7 @@ const AppRoutes: React.FC = () => {
       <Route path="/berita" element={<News />} />
       <Route path="/berita/:id" element={<NewsDetail />} />
       <Route path="/materi" element={<Materials />} />
+      <Route path="/praktik-baik" element={<BestPractices />} />
       <Route path="/dokumentasi" element={<Documentation />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />

@@ -2,15 +2,16 @@ import React, { useEffect, useState } from 'react';
 import { collection, query, where, orderBy, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 import { NewsArticle } from '../types';
-import { formatDate, getDirectImageUrl } from '../utils';
+import { formatDate, getDirectImageUrl, handleFirestoreError, OperationType } from '../utils';
 import { Link } from 'react-router-dom';
 
 const News: React.FC = () => {
   const [news, setNews] = useState<NewsArticle[]>([]);
 
   useEffect(() => {
+    const path = 'news';
     const q = query(
-      collection(db, 'news'),
+      collection(db, path),
       where('isApproved', '==', true),
       orderBy('createdAt', 'desc')
     );
@@ -18,6 +19,8 @@ const News: React.FC = () => {
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as NewsArticle));
       setNews(data);
+    }, (error) => {
+      handleFirestoreError(error, OperationType.LIST, path);
     });
 
     return () => unsubscribe();

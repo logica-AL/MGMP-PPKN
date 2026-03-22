@@ -97,6 +97,48 @@
         "isApproved": { "type": "boolean" }
       },
       "required": ["title", "description", "imageUrls", "authorId", "authorName", "createdAt", "isApproved"]
+    },
+    "BestPractice": {
+      "title": "Best Practice",
+      "description": "Collaborative space for sharing teaching strategies and innovations.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "driveUrl": { "type": "string", "format": "uri" },
+        "category": { "type": "string", "enum": ["Metode Pembelajaran Kreatif", "Media Ajar Inovatif", "Administrasi & Modul", "Video Praktik Baik"] },
+        "fileType": { "type": "string", "enum": ["PDF", "DOCX", "PPT", "Folder", "Video", "Lainnya"] },
+        "authorId": { "type": "string" },
+        "authorName": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "isApproved": { "type": "boolean" }
+      },
+      "required": ["title", "description", "driveUrl", "category", "fileType", "authorId", "authorName", "createdAt", "isApproved"]
+    },
+    "BestPracticeComment": {
+      "title": "Best Practice Comment",
+      "description": "Comment on a specific best practice entry.",
+      "type": "object",
+      "properties": {
+        "bestPracticeId": { "type": "string" },
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "content": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["bestPracticeId", "userId", "userName", "content", "createdAt"]
+    },
+    "BestPracticeMessage": {
+      "title": "Best Practice Message",
+      "description": "Chat message in the Best Practice section.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "message": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "userName", "message", "createdAt"]
     }
   },
   "firestore": {
@@ -127,6 +169,18 @@
     "documentation/{docId}": {
       "schema": "Documentation",
       "description": "Activity documentation collection."
+    },
+    "best_practices/{bpId}": {
+      "schema": "BestPractice",
+      "description": "Best practices collection."
+    },
+    "best_practice_messages/{msgId}": {
+      "schema": "BestPracticeMessage",
+      "description": "Global chat messages for best practices."
+    },
+    "best_practice_comments/{commentId}": {
+      "schema": "BestPracticeComment",
+      "description": "Comments on specific best practices."
     }
   }
 }

@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { collection, query, where, onSnapshot, doc, updateDoc, deleteDoc, addDoc, setDoc, Timestamp, orderBy } from 'firebase/firestore';
 import { db } from '../firebase';
-import { UserProfile, NewsArticle, StaffMember, TeacherEvent, EducationalMaterial, SiteSettings, Documentation } from '../types';
+import { UserProfile, NewsArticle, StaffMember, TeacherEvent, EducationalMaterial, SiteSettings, Documentation, BestPractice } from '../types';
 import { useAuth } from '../AuthContext';
-import { Check, X, Trash2, Plus, UserCheck, FileText, Users as UsersIcon, Calendar, BookOpen, Settings as SettingsIcon, Camera } from 'lucide-react';
+import { Check, X, Trash2, Plus, UserCheck, FileText, Users as UsersIcon, Calendar, BookOpen, Settings as SettingsIcon, Camera, MessageSquare } from 'lucide-react';
 import { formatDate, handleFirestoreError, OperationType, getDirectImageUrl } from '../utils';
 
 const AdminDashboard: React.FC = () => {
@@ -13,14 +13,16 @@ const AdminDashboard: React.FC = () => {
   const [pendingEvents, setPendingEvents] = useState<TeacherEvent[]>([]);
   const [pendingMaterials, setPendingMaterials] = useState<EducationalMaterial[]>([]);
   const [pendingDocs, setPendingDocs] = useState<Documentation[]>([]);
+  const [pendingBestPractices, setPendingBestPractices] = useState<BestPractice[]>([]);
   const [allNews, setAllNews] = useState<NewsArticle[]>([]);
   const [allEvents, setAllEvents] = useState<TeacherEvent[]>([]);
   const [allMaterials, setAllMaterials] = useState<EducationalMaterial[]>([]);
   const [allDocs, setAllDocs] = useState<Documentation[]>([]);
+  const [allBestPractices, setAllBestPractices] = useState<BestPractice[]>([]);
   const [staff, setStaff] = useState<StaffMember[]>([]);
   const [allUsers, setAllUsers] = useState<UserProfile[]>([]);
   const [settings, setSettings] = useState<SiteSettings | null>(null);
-  const [activeTab, setActiveTab] = useState<'verification' | 'moderation' | 'staff' | 'users' | 'all-news' | 'all-events' | 'all-materials' | 'all-docs' | 'settings'>('verification');
+  const [activeTab, setActiveTab] = useState<'verification' | 'moderation' | 'staff' | 'users' | 'all-news' | 'all-events' | 'all-materials' | 'all-docs' | 'all-best-practices' | 'settings'>('verification');
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
   // New Staff Form State
@@ -118,6 +120,23 @@ const AdminDashboard: React.FC = () => {
       handleFirestoreError(error, OperationType.LIST, pathDocs);
     });
 
+    // Pending Best Practices
+    const pathBP = 'best_practices';
+    const qPendingBP = query(collection(db, pathBP), where('isApproved', '==', false));
+    const unsubPendingBP = onSnapshot(qPendingBP, (snap) => {
+      setPendingBestPractices(snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as BestPractice)));
+    }, (error) => {
+      handleFirestoreError(error, OperationType.LIST, pathBP);
+    });
+
+    // All Best Practices
+    const qAllBP = query(collection(db, pathBP), orderBy('createdAt', 'desc'));
+    const unsubAllBP = onSnapshot(qAllBP, (snap) => {
+      setAllBestPractices(snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as BestPractice)));
+    }, (error) => {
+      handleFirestoreError(error, OperationType.LIST, pathBP);
+    });
+
     // Settings
     const unsubSettings = onSnapshot(doc(db, 'settings', 'main'), (snap) => {
       if (snap.exists()) {
@@ -129,6 +148,8 @@ const AdminDashboard: React.FC = () => {
           history: data.history || ''
         });
       }
+    }, (error) => {
+      handleFirestoreError(error, OperationType.GET, 'settings/main');
     });
 
     // Staff
@@ -159,6 +180,8 @@ const AdminDashboard: React.FC = () => {
       unsubMaterials();
       unsubPendingDocs();
       unsubAllDocs();
+      unsubPendingBP();
+      unsubAllBP();
       unsubStaff();
       unsubUsers();
       unsubSettings();
@@ -246,6 +269,23 @@ const AdminDashboard: React.FC = () => {
     } catch (error) {
       handleFirestoreError(error, OperationType.WRITE, path);
       showToast('Gagal memproses dokumentasi', 'error');
+    }
+  };
+
+  const handleApproveBestPractice = async (id: string, approve: boolean) => {
+    const path = `best_practices/${id}`;
+    const bpRef = doc(db, 'best_practices', id);
+    try {
+      if (approve) {
+        await updateDoc(bpRef, { isApproved: true });
+        showToast('Praktik Baik berhasil disetujui');
+      } else {
+        await deleteDoc(bpRef);
+        showToast('Praktik Baik dihapus');
+      }
+    } catch (error) {
+      handleFirestoreError(error, OperationType.WRITE, path);
+      showToast('Gagal memproses praktik baik', 'error');
     }
   };
 
@@ -400,6 +440,13 @@ const AdminDashboard: React.FC = () => {
           >
             <Camera className="w-4 h-4 inline-block mr-2" />
             Semua Dokumentasi
+          </button>
+          <button
+            onClick={() => setActiveTab('all-best-practices')}
+            className={`px-4 py-2 text-sm font-bold rounded-md transition-colors ${activeTab === 'all-best-practices' ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-50'}`}
+          >
+            <MessageSquare className="w-4 h-4 inline-block mr-2" />
+            Semua Praktik Baik
           </button>
           <button
             onClick={() => setActiveTab('staff')}
@@ -680,8 +727,62 @@ const AdminDashboard: React.FC = () => {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={4} className="px-6 py-12 text-center text-slate-400">
+                      <td colSpan={5} className="px-6 py-12 text-center text-slate-400">
                         Tidak ada dokumentasi yang menunggu persetujuan.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Best Practices Moderation */}
+          <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+            <div className="p-6 border-b border-slate-100">
+              <h2 className="text-xl font-bold text-slate-900">Moderasi Praktik Baik</h2>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left">
+                <thead className="bg-slate-50 text-slate-500 text-xs font-bold uppercase tracking-wider">
+                  <tr>
+                    <th className="px-6 py-4">Judul</th>
+                    <th className="px-6 py-4">Kategori</th>
+                    <th className="px-6 py-4">Jenis</th>
+                    <th className="px-6 py-4">Penulis</th>
+                    <th className="px-6 py-4">Tanggal Upload</th>
+                    <th className="px-6 py-4 text-right">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {pendingBestPractices.length > 0 ? (
+                    pendingBestPractices.map((bp) => (
+                      <tr key={bp.id} className="hover:bg-slate-50 transition-colors">
+                        <td className="px-6 py-4 font-medium text-slate-900">{bp.title}</td>
+                        <td className="px-6 py-4 text-slate-500 text-sm">{bp.category}</td>
+                        <td className="px-6 py-4 text-slate-500 text-sm">{bp.fileType}</td>
+                        <td className="px-6 py-4 text-slate-500">{bp.authorName}</td>
+                        <td className="px-6 py-4 text-slate-500">{formatDate(bp.createdAt)}</td>
+                        <td className="px-6 py-4 text-right space-x-2">
+                          <button
+                            onClick={() => handleApproveBestPractice(bp.id, true)}
+                            className="p-2 bg-emerald-50 text-emerald-600 rounded-lg hover:bg-emerald-100 transition-colors"
+                          >
+                            <Check className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleApproveBestPractice(bp.id, false)}
+                            className="p-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={4} className="px-6 py-12 text-center text-slate-400">
+                        Tidak ada praktik baik yang menunggu persetujuan.
                       </td>
                     </tr>
                   )}
@@ -823,6 +924,8 @@ const AdminDashboard: React.FC = () => {
               <thead className="bg-slate-50 text-slate-500 text-xs font-bold uppercase tracking-wider">
                 <tr>
                   <th className="px-6 py-4">Judul</th>
+                  <th className="px-6 py-4">Kategori</th>
+                  <th className="px-6 py-4">Jenis</th>
                   <th className="px-6 py-4">Penulis</th>
                   <th className="px-6 py-4">Tanggal Upload</th>
                   <th className="px-6 py-4 text-right">Aksi</th>
@@ -878,6 +981,51 @@ const AdminDashboard: React.FC = () => {
                     <td className="px-6 py-4 text-right">
                       <button
                         onClick={() => handleDeleteContent('documentation', doc.id)}
+                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'all-best-practices' && (
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+          <div className="p-6 border-b border-slate-100">
+            <h2 className="text-xl font-bold text-slate-900">Semua Praktik Baik</h2>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead className="bg-slate-50 text-slate-500 text-xs font-bold uppercase tracking-wider">
+                <tr>
+                  <th className="px-6 py-4">Judul</th>
+                  <th className="px-6 py-4">Kategori</th>
+                  <th className="px-6 py-4">Jenis</th>
+                  <th className="px-6 py-4">Penulis</th>
+                  <th className="px-6 py-4">Status</th>
+                  <th className="px-6 py-4 text-right">Aksi</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {allBestPractices.map((bp) => (
+                  <tr key={bp.id} className="hover:bg-slate-50 transition-colors">
+                    <td className="px-6 py-4 font-medium text-slate-900">{bp.title}</td>
+                    <td className="px-6 py-4 text-slate-500 text-sm">{bp.category}</td>
+                    <td className="px-6 py-4 text-slate-500 text-sm">{bp.fileType}</td>
+                    <td className="px-6 py-4 text-slate-500">{bp.authorName}</td>
+                    <td className="px-6 py-4">
+                      <span className={`px-2 py-1 text-xs font-bold rounded-full ${bp.isApproved ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
+                        {bp.isApproved ? 'Aktif' : 'Pending'}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <button
+                        onClick={() => handleDeleteContent('best_practices', bp.id)}
                         className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                       >
                         <Trash2 className="w-4 h-4" />

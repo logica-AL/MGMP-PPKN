@@ -2,16 +2,19 @@ import React, { useEffect, useState } from 'react';
 import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 import { StaffMember } from '../types';
-import { getDirectImageUrl } from '../utils';
+import { getDirectImageUrl, handleFirestoreError, OperationType } from '../utils';
 
 const Staff: React.FC = () => {
   const [staff, setStaff] = useState<StaffMember[]>([]);
 
   useEffect(() => {
-    const q = query(collection(db, 'staff'), orderBy('order', 'asc'));
+    const path = 'staff';
+    const q = query(collection(db, path), orderBy('order', 'asc'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as StaffMember));
       setStaff(data);
+    }, (error) => {
+      handleFirestoreError(error, OperationType.LIST, path);
     });
     return () => unsubscribe();
   }, []);

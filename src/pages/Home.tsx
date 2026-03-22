@@ -31,6 +31,8 @@ const Home: React.FC = () => {
       if (snapshot.exists()) {
         setSettings({ id: snapshot.id, ...snapshot.data() } as SiteSettings);
       }
+    }, (error) => {
+      handleFirestoreError(error, OperationType.GET, settingsPath);
     });
 
     return () => {
@@ -62,8 +64,10 @@ const Home: React.FC = () => {
               referrerPolicy="no-referrer"
             />
           </div>
-          <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 tracking-tight">
-            MGMP PPKN SMP MOJOKERTO
+          <h1 className="text-4xl md:text-6xl font-black text-white mb-6 tracking-tight flex flex-col items-center">
+            <span>MGMP</span>
+            <span className="text-3xl md:text-5xl">Pendidikan Pancasilla</span>
+            <span className="text-xl md:text-3xl font-bold text-slate-200 mt-2">SMP Se-kabupaten Mojokerto</span>
           </h1>
           <p className="text-lg md:text-xl text-slate-300 mb-10 max-w-2xl mx-auto">
             Wadah kolaborasi dan peningkatan profesionalisme guru PPKN SMP Kabupaten Mojokerto.

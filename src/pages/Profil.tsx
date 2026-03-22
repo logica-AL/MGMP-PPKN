@@ -3,15 +3,19 @@ import { Target, Eye, History } from 'lucide-react';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 import { SiteSettings } from '../types';
+import { handleFirestoreError, OperationType } from '../utils';
 
 const Profil: React.FC = () => {
   const [settings, setSettings] = useState<SiteSettings | null>(null);
 
   useEffect(() => {
+    const path = 'settings/main';
     const unsubscribe = onSnapshot(doc(db, 'settings', 'main'), (snapshot) => {
       if (snapshot.exists()) {
         setSettings({ id: snapshot.id, ...snapshot.data() } as SiteSettings);
       }
+    }, (error) => {
+      handleFirestoreError(error, OperationType.GET, path);
     });
 
     return () => unsubscribe();

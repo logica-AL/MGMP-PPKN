@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Menu, X, LogIn, LogOut, LayoutDashboard, User } from 'lucide-react';
 import { useAuth } from '../AuthContext';
 import { auth } from '../firebase';
@@ -9,6 +9,7 @@ const Navbar: React.FC = () => {
   const { user, profile, isAdmin } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = async () => {
     await auth.signOut();
@@ -22,37 +23,49 @@ const Navbar: React.FC = () => {
     { name: 'Acara', path: '/acara' },
     { name: 'Berita', path: '/berita' },
     { name: 'Perangkat Pembelajaran', path: '/materi' },
+    { name: 'Praktik Baik', path: '/praktik-baik' },
     { name: 'Dokumentasi', path: '/dokumentasi' },
   ];
+
+  const isActive = (path: string) => {
+    if (path === '/' && location.pathname !== '/') return false;
+    return location.pathname.startsWith(path);
+  };
 
   return (
     <nav className="bg-white border-b border-slate-200 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
+        <div className="flex justify-between h-20">
           <div className="flex items-center">
             <Link to="/" className="flex-shrink-0 flex items-center">
               <img
                 src="https://lh3.googleusercontent.com/d/1jwoFQNLORP7hnnZqjoEoK27yavygL6Fb"
                 alt="MGMP Logo"
-                className="h-10 w-10 object-contain rounded-full border-2 border-slate-100 p-0.5 bg-white"
+                className="h-12 w-12 object-contain rounded-full border-2 border-slate-100 p-0.5 bg-white"
                 referrerPolicy="no-referrer"
               />
               <div className="ml-3 flex flex-col">
-                <span className="text-xl font-bold text-slate-900 leading-none">MGMP PPKN</span>
-                <span className="text-[10px] font-medium text-slate-500 hidden sm:block uppercase tracking-tight">
-                  SMP MOJOKERTO
+                <span className="text-xl font-black text-slate-900 leading-none tracking-tight">MGMP</span>
+                <span className="text-sm font-bold text-slate-800 leading-tight">Pendidikan Pancasilla</span>
+                <span className="text-[10px] font-semibold text-slate-500 hidden sm:block uppercase tracking-wider">
+                  SMP Se-kabupaten Mojokerto
                 </span>
               </div>
             </Link>
           </div>
 
           {/* Desktop Nav */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden md:flex items-center space-x-6">
             {navLinks.map((link) => (
               <Link
                 key={link.name}
                 to={link.path}
-                className="text-slate-600 hover:text-slate-900 text-sm font-medium transition-colors"
+                className={cn(
+                  "text-sm transition-colors",
+                  isActive(link.path)
+                    ? "text-slate-900 font-black"
+                    : "text-slate-600 hover:text-slate-900 font-medium"
+                )}
               >
                 {link.name}
               </Link>
@@ -106,7 +119,12 @@ const Navbar: React.FC = () => {
               key={link.name}
               to={link.path}
               onClick={() => setIsOpen(false)}
-              className="block px-3 py-2 rounded-md text-base font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+              className={cn(
+                "block px-3 py-2 rounded-md text-base transition-colors",
+                isActive(link.path)
+                  ? "text-slate-900 font-black bg-slate-50"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-50 font-medium"
+              )}
             >
               {link.name}
             </Link>
