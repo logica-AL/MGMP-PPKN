@@ -92,9 +92,9 @@ const Home: React.FC = () => {
             <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center mb-6">
               <BookOpen className="w-6 h-6" />
             </div>
-            <h3 className="text-xl font-bold mb-4">Materi</h3>
+            <h3 className="text-xl font-bold mb-4">Perangkat Pembelajaran</h3>
             <p className="text-slate-600 leading-relaxed">
-              Akses dokumen dan materi pembelajaran yang disusun oleh guru-guru berpengalaman.
+              Akses dokumen dan perangkat pembelajaran yang disusun oleh guru-guru berpengalaman.
             </p>
           </div>
           <div className="p-8 bg-white rounded-xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow">

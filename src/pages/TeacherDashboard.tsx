@@ -84,7 +84,7 @@ const TeacherDashboard: React.FC = () => {
         isApproved: false // Materials require admin approval
       });
       setSuccess(true);
-      toast.success('Materi berhasil dikirim untuk persetujuan');
+      toast.success('Perangkat Pembelajaran berhasil dikirim untuk persetujuan');
       setMaterialForm({ title: '', description: '', fileUrl: '' });
     } catch (err) {
       handleFirestoreError(err, OperationType.WRITE, 'materials');
@@ -180,7 +180,7 @@ const TeacherDashboard: React.FC = () => {
         >
           <BookOpen className={`w-8 h-8 ${activeForm === 'material' ? 'text-white' : 'text-slate-400'}`} />
           <div>
-            <h3 className="font-bold text-lg">Materi</h3>
+            <h3 className="font-bold text-lg">Perangkat Pembelajaran</h3>
             <p className="text-sm opacity-70">Langsung dipublikasikan.</p>
           </div>
         </button>
@@ -309,10 +309,10 @@ const TeacherDashboard: React.FC = () => {
 
       {activeForm === 'material' && (
         <form onSubmit={handleSubmitMaterial} className="bg-white rounded-2xl shadow-sm border border-slate-100 p-10 space-y-6">
-          <h2 className="text-xl font-bold text-slate-900">Unggah Materi Baru</h2>
+          <h2 className="text-xl font-bold text-slate-900">Unggah Perangkat Pembelajaran Baru</h2>
           <div className="space-y-4">
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-slate-700">Judul Materi</label>
+              <label className="text-sm font-semibold text-slate-700">Judul Perangkat</label>
               <input
                 type="text"
                 required

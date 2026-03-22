@@ -7,7 +7,7 @@ Selamat datang di platform resmi **MGMP PPKN SMP Kabupaten Mojokerto**. Website 
 ## 1. Definisi & Fungsi Utama Website
 Website ini berfungsi sebagai:
 *   **Pusat Informasi**: Menyajikan berita terbaru dan jadwal acara MGMP secara real-time.
-*   **Repositori Materi**: Tempat berbagi RPP, modul ajar, dan media pembelajaran antar guru.
+*   **Repositori Perangkat Pembelajaran**: Tempat berbagi RPP, modul ajar, dan media pembelajaran antar guru.
 *   **Galeri Dokumentasi**: Arsip visual kegiatan yang telah dilaksanakan.
 *   **Sistem Moderasi**: Menjamin kualitas konten yang dipublikasikan melalui proses verifikasi Admin.
 *   **Profil Organisasi**: Mengenalkan struktur pengurus dan visi-misi MGMP kepada publik.
@@ -21,7 +21,7 @@ Halaman-halaman yang tersedia di navigasi utama:
 3.  **Pengurus**: Daftar pengurus aktif beserta jabatan dan asal sekolah.
 4.  **Acara**: Kalender kegiatan lengkap dengan detail lokasi dan waktu.
 5.  **Berita**: Kumpulan artikel seputar pendidikan dan kegiatan internal MGMP.
-6.  **Materi**: Daftar file pembelajaran yang dapat diunduh (PDF, Docx, Link Drive).
+6.  **Perangkat Pembelajaran**: Daftar file pembelajaran yang dapat diunduh (PDF, Docx, Link Drive).
 7.  **Dokumentasi**: Galeri foto kegiatan yang dikelompokkan berdasarkan album.
 
 ---
@@ -50,7 +50,7 @@ Website ini mendukung dua metode masuk: **Akun Google** dan **Email/Password Man
 Guru memiliki akses untuk memperkaya konten website.
 
 ### Fitur Dashboard Guru:
-*   **Kelola Materi**: Unggah file pendukung pembelajaran.
+*   **Kelola Perangkat Pembelajaran**: Unggah file pendukung pembelajaran.
 *   **Kelola Berita**: Tulis artikel atau kabar dari sekolah masing-masing.
 *   **Kelola Acara**: Usulkan kegiatan MGMP di tingkat sub-rayon atau kabupaten.
 *   **Kelola Dokumentasi**: Unggah foto-foto kegiatan kolektif.
@@ -59,7 +59,7 @@ Guru memiliki akses untuk memperkaya konten website.
 1.  Guru mengisi form tambah konten di Dashboard.
 2.  Konten tersimpan di database dengan status **"Pending"**.
 3.  Konten **TIDAK AKAN MUNCUL** di halaman publik sampai disetujui Admin.
-4.  Setelah Admin menyetujui, konten otomatis muncul di halaman terkait (Materi/Berita/dll).
+4.  Setelah Admin menyetujui, konten otomatis muncul di halaman terkait (Perangkat Pembelajaran/Berita/dll).
 
 ---
 

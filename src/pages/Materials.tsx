@@ -26,9 +26,9 @@ const Materials: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 py-20 space-y-16">
       <div className="text-center space-y-4">
-        <h1 className="text-4xl font-bold text-slate-900 tracking-tight">Materi Pembelajaran</h1>
+        <h1 className="text-4xl font-bold text-slate-900 tracking-tight">Perangkat Pembelajaran</h1>
         <p className="text-slate-500 max-w-2xl mx-auto">
-          Dapatkan akses ke berbagai dokumen dan materi pembelajaran untuk mendukung kegiatan mengajar Anda.
+          Dapatkan akses ke berbagai dokumen dan perangkat pembelajaran untuk mendukung kegiatan mengajar Anda.
         </p>
       </div>
 
@@ -54,7 +54,7 @@ const Materials: React.FC = () => {
                   className="inline-flex items-center justify-center px-6 py-3 bg-slate-900 text-white text-sm font-bold rounded-lg hover:bg-slate-800 transition-colors"
                 >
                   <Download className="w-4 h-4 mr-2" />
-                  Unduh Materi
+                  Unduh File
                 </a>
               ) : (
                 <Link
@@ -69,7 +69,7 @@ const Materials: React.FC = () => {
           ))
         ) : (
           <div className="col-span-3 text-center py-12 text-slate-400">
-            Belum ada materi yang tersedia.
+            Belum ada perangkat pembelajaran yang tersedia.
           </div>
         )}
       </div>

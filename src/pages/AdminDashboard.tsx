@@ -221,14 +221,14 @@ const AdminDashboard: React.FC = () => {
     try {
       if (approve) {
         await updateDoc(materialRef, { isApproved: true });
-        showToast('Materi berhasil disetujui');
+        showToast('Perangkat Pembelajaran berhasil disetujui');
       } else {
         await deleteDoc(materialRef);
-        showToast('Materi dihapus');
+        showToast('Perangkat Pembelajaran dihapus');
       }
     } catch (error) {
       handleFirestoreError(error, OperationType.WRITE, path);
-      showToast('Gagal memproses materi', 'error');
+      showToast('Gagal memproses perangkat pembelajaran', 'error');
     }
   };
 
@@ -392,7 +392,7 @@ const AdminDashboard: React.FC = () => {
             className={`px-4 py-2 text-sm font-bold rounded-md transition-colors ${activeTab === 'all-materials' ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-50'}`}
           >
             <BookOpen className="w-4 h-4 inline-block mr-2" />
-            Semua Materi
+            Semua Perangkat
           </button>
           <button
             onClick={() => setActiveTab('all-docs')}
@@ -574,7 +574,7 @@ const AdminDashboard: React.FC = () => {
           {/* Materials Moderation */}
           <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
             <div className="p-6 border-b border-slate-100">
-              <h2 className="text-xl font-bold text-slate-900">Moderasi Materi</h2>
+              <h2 className="text-xl font-bold text-slate-900">Moderasi Perangkat Pembelajaran</h2>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-left">
@@ -816,7 +816,7 @@ const AdminDashboard: React.FC = () => {
       {activeTab === 'all-materials' && (
         <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
           <div className="p-6 border-b border-slate-100">
-            <h2 className="text-xl font-bold text-slate-900">Semua Materi</h2>
+            <h2 className="text-xl font-bold text-slate-900">Semua Perangkat Pembelajaran</h2>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left">

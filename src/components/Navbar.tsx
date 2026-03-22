@@ -21,7 +21,7 @@ const Navbar: React.FC = () => {
     { name: 'Pengurus', path: '/pengurus' },
     { name: 'Acara', path: '/acara' },
     { name: 'Berita', path: '/berita' },
-    { name: 'Materi', path: '/materi' },
+    { name: 'Perangkat Pembelajaran', path: '/materi' },
     { name: 'Dokumentasi', path: '/dokumentasi' },
   ];
 
