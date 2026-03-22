@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { collection, query, where, orderBy, onSnapshot, addDoc, Timestamp, limit, doc, updateDoc, getDoc } from 'firebase/firestore';
+import { collection, query, where, orderBy, onSnapshot, addDoc, Timestamp, limit, doc, updateDoc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../AuthContext';
 import { BestPractice, BestPracticeMessage, BestPracticeCategory, BestPracticeComment } from '../types';
@@ -177,7 +177,8 @@ const BestPractices: React.FC = () => {
         ratingCount: newCount
       });
 
-      await addDoc(collection(db, 'best_practice_ratings'), {
+      const ratingId = `${user.uid}_${practiceId}`;
+      await setDoc(doc(db, 'best_practice_ratings', ratingId), {
         bestPracticeId: practiceId,
         userId: user.uid,
         rating: rating,
