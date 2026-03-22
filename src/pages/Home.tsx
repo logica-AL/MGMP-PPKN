@@ -46,7 +46,7 @@ const Home: React.FC = () => {
   return (
     <div className="pb-20">
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-slate-900 pt-20">
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-slate-900 pt-20 pb-32 md:pb-48">
         <div className="absolute inset-0">
           <img
             src={getDirectImageUrl(heroBg)}
@@ -57,7 +57,7 @@ const Home: React.FC = () => {
           <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/20 to-slate-50"></div>
         </div>
         
-        <div className="relative z-10 max-w-5xl mx-auto text-center px-4">
+        <div className="relative z-30 max-w-5xl mx-auto text-center px-4">
           <div className="mb-10 flex justify-center animate-fade-in">
             <img
               src="https://lh3.googleusercontent.com/d/1jwoFQNLORP7hnnZqjoEoK27yavygL6Fb"
@@ -99,7 +99,7 @@ const Home: React.FC = () => {
       </section>
 
       {/* Features Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-24 relative z-20">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-12 md:-mt-24 relative z-20">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Feature 1 */}
           <div className="glass-card p-10 rounded-3xl group hover:-translate-y-2 transition-all duration-500">
