@@ -125,6 +125,12 @@ const Login: React.FC = () => {
                 placeholder="••••••••"
               />
             </div>
+            <div className="flex items-center justify-between">
+              <label className="flex items-center text-sm text-slate-600 cursor-pointer">
+                <input type="checkbox" className="mr-2 rounded border-slate-300 text-slate-900 focus:ring-slate-900" />
+                Ingat Password
+              </label>
+            </div>
             <button
               type="submit"
               disabled={loading}

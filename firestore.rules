@@ -92,8 +92,7 @@ service cloud.firestore {
       return isAuthenticated() && (
         (request.auth.token.email == "logicafalfa21@gmail.com" && request.auth.token.email_verified == true) || 
         (exists(/databases/$(database)/documents/profiles/$(request.auth.uid)) && 
-         get(/databases/$(database)/documents/profiles/$(request.auth.uid)).data.role == 'admin' &&
-         request.auth.token.email_verified == true)
+         get(/databases/$(database)/documents/profiles/$(request.auth.uid)).data.role == 'admin')
       );
     }
 

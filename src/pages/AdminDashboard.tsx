@@ -917,14 +917,15 @@ const AdminDashboard: React.FC = () => {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-500 uppercase">URL Foto</label>
+                <label className="text-xs font-bold text-slate-500 uppercase">URL Foto (Wajib Google Drive)</label>
                 <input
                   type="text"
                   value={newStaff.imageUrl}
                   onChange={(e) => setNewStaff({ ...newStaff, imageUrl: e.target.value })}
                   className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900"
-                  placeholder="https://..."
+                  placeholder="https://drive.google.com/..."
                 />
+                <p className="text-[10px] text-slate-400">Wajib menggunakan link dari Google Drive.</p>
               </div>
               <div className="space-y-2">
                 <label className="text-xs font-bold text-slate-500 uppercase">Urutan</label>

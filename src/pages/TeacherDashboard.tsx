@@ -218,15 +218,16 @@ const TeacherDashboard: React.FC = () => {
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-slate-700">URL Gambar</label>
+              <label className="text-sm font-semibold text-slate-700">URL Gambar (Wajib Google Drive)</label>
               <input
                 type="text"
                 required
                 value={newsForm.imageUrl}
                 onChange={(e) => setNewsForm({ ...newsForm, imageUrl: e.target.value })}
                 className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900"
-                placeholder="https://..."
+                placeholder="https://drive.google.com/..."
               />
+              <p className="text-xs text-slate-500">Wajib menggunakan link dari Google Drive.</p>
             </div>
             <div className="space-y-2">
               <label className="text-sm font-semibold text-slate-700">Konten / Narasi</label>
@@ -321,15 +322,16 @@ const TeacherDashboard: React.FC = () => {
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-slate-700">URL File (Google Drive/Dropbox/dll)</label>
+              <label className="text-sm font-semibold text-slate-700">URL File (Wajib Google Drive)</label>
               <input
                 type="text"
                 required
                 value={materialForm.fileUrl}
                 onChange={(e) => setMaterialForm({ ...materialForm, fileUrl: e.target.value })}
                 className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900"
-                placeholder="https://..."
+                placeholder="https://drive.google.com/..."
               />
+              <p className="text-xs text-slate-500">Wajib menggunakan link dari Google Drive.</p>
             </div>
             <div className="space-y-2">
               <label className="text-sm font-semibold text-slate-700">Deskripsi</label>
@@ -367,15 +369,16 @@ const TeacherDashboard: React.FC = () => {
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-slate-700">URL Foto (Pisahkan dengan koma atau baris baru)</label>
+              <label className="text-sm font-semibold text-slate-700">URL Foto (Wajib Google Drive - Pisahkan dengan koma atau baris baru)</label>
               <textarea
                 required
                 rows={3}
                 value={docForm.imageUrls}
                 onChange={(e) => setDocForm({ ...docForm, imageUrls: e.target.value })}
                 className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900"
-                placeholder="https://image1.jpg, https://image2.jpg"
+                placeholder="https://drive.google.com/file/d/..."
               />
+              <p className="text-xs text-slate-500">Wajib menggunakan link dari Google Drive.</p>
             </div>
             <div className="space-y-2">
               <label className="text-sm font-semibold text-slate-700">Deskripsi Kegiatan</label>
