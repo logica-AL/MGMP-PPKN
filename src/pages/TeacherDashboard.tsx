@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { collection, addDoc, Timestamp, query, where, onSnapshot, deleteDoc, doc } from 'firebase/firestore';
+import { collection, addDoc, Timestamp, query, where, onSnapshot, deleteDoc, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../AuthContext';
-import { FileText, Calendar, BookOpen, Send, AlertCircle, CheckCircle, Camera, MessageSquare, Star, Trash2 } from 'lucide-react';
+import { FileText, Calendar, BookOpen, Send, AlertCircle, CheckCircle, Camera, MessageSquare, Star, Trash2, User as UserIcon } from 'lucide-react';
 import { BestPractice, EducationalMaterial, NewsArticle, TeacherEvent, Documentation } from '../types';
 import { formatDate } from '../utils';
 import toast from 'react-hot-toast';
@@ -10,7 +10,7 @@ import { handleFirestoreError, OperationType } from '../utils';
 
 const TeacherDashboard: React.FC = () => {
   const { profile } = useAuth();
-  const [activeForm, setActiveForm] = useState<'news' | 'event' | 'material' | 'documentation' | 'bestPractice' | null>(null);
+  const [activeForm, setActiveForm] = useState<'news' | 'event' | 'material' | 'documentation' | 'bestPractice' | 'profile' | null>(null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
@@ -27,6 +27,21 @@ const TeacherDashboard: React.FC = () => {
     category: 'Metode Pembelajaran Kreatif' as any,
     fileType: 'PDF' as any
   });
+  const [profileForm, setProfileForm] = useState({ 
+    name: profile?.name || '', 
+    school: profile?.school || '', 
+    photoUrl: profile?.photoUrl || '' 
+  });
+
+  React.useEffect(() => {
+    if (profile) {
+      setProfileForm({
+        name: profile.name,
+        school: profile.school || '',
+        photoUrl: profile.photoUrl || ''
+      });
+    }
+  }, [profile]);
 
   const [myPractices, setMyPractices] = useState<BestPractice[]>([]);
   const [myMaterials, setMyMaterials] = useState<EducationalMaterial[]>([]);
@@ -219,6 +234,7 @@ const TeacherDashboard: React.FC = () => {
         ...bpForm,
         authorId: profile.uid,
         authorName: profile.name,
+        authorPhotoUrl: profile.photoUrl || '',
         createdAt: Timestamp.now(),
         isApproved: false
       });
@@ -234,6 +250,25 @@ const TeacherDashboard: React.FC = () => {
       });
     } catch (err) {
       handleFirestoreError(err, OperationType.WRITE, 'best_practices');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpdateProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!profile?.uid) return;
+    setLoading(true);
+    try {
+      await updateDoc(doc(db, 'profiles', profile.uid), {
+        name: profileForm.name,
+        school: profileForm.school,
+        photoUrl: profileForm.photoUrl
+      });
+      setSuccess(true);
+      toast.success('Profil berhasil diperbarui');
+    } catch (err) {
+      handleFirestoreError(err, OperationType.WRITE, `profiles/${profile.uid}`);
     } finally {
       setLoading(false);
     }
@@ -314,7 +349,64 @@ const TeacherDashboard: React.FC = () => {
             <p className="text-sm opacity-70">Butuh persetujuan admin.</p>
           </div>
         </button>
+        <button
+          onClick={() => { setActiveForm('profile'); setSuccess(false); }}
+          className={`p-8 rounded-2xl border transition-all text-left space-y-4 ${activeForm === 'profile' ? 'bg-slate-900 border-slate-900 text-white shadow-lg' : 'bg-white border-slate-100 text-slate-600 hover:border-slate-300'}`}
+        >
+          <UserIcon className={`w-8 h-8 ${activeForm === 'profile' ? 'text-white' : 'text-slate-400'}`} />
+          <div>
+            <h3 className="font-bold text-lg">Pengaturan Profil</h3>
+            <p className="text-sm opacity-70">Ubah nama, sekolah, dan foto.</p>
+          </div>
+        </button>
       </div>
+
+      {activeForm === 'profile' && (
+        <form onSubmit={handleUpdateProfile} className="bg-white rounded-2xl shadow-sm border border-slate-100 p-10 space-y-6">
+          <h2 className="text-xl font-bold text-slate-900">Pengaturan Profil</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-slate-700">Nama Lengkap</label>
+              <input
+                type="text"
+                required
+                value={profileForm.name}
+                onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })}
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-slate-700">Asal Sekolah</label>
+              <input
+                type="text"
+                required
+                value={profileForm.school}
+                onChange={(e) => setProfileForm({ ...profileForm, school: e.target.value })}
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900"
+              />
+            </div>
+            <div className="space-y-2 md:col-span-2">
+              <label className="text-sm font-semibold text-slate-700">URL Foto Profil (Wajib Google Drive)</label>
+              <input
+                type="text"
+                value={profileForm.photoUrl}
+                onChange={(e) => setProfileForm({ ...profileForm, photoUrl: e.target.value })}
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900"
+                placeholder="https://drive.google.com/..."
+              />
+              <p className="text-[10px] text-slate-400">Wajib menggunakan link dari Google Drive.</p>
+            </div>
+          </div>
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full py-4 bg-slate-900 text-white font-bold rounded-lg hover:bg-slate-800 transition-colors flex items-center justify-center"
+          >
+            <Send className="w-4 h-4 mr-2" />
+            {loading ? 'Menyimpan...' : 'Simpan Perubahan'}
+          </button>
+        </form>
+      )}
 
       {success && (
         <div className="p-6 bg-emerald-50 border border-emerald-100 rounded-xl flex items-center text-emerald-700">

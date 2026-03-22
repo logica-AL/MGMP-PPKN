@@ -87,15 +87,25 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="min-h-[calc(100vh-64px)] flex items-center justify-center bg-slate-50 px-4 py-12">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-sm border border-slate-100 p-10 space-y-8">
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4 py-32">
+      <div className="max-w-md w-full bg-white rounded-3xl shadow-2xl border border-slate-100 p-10 space-y-8 relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-primary via-accent to-primary"></div>
+        
         <div className="text-center">
-          <h2 className="text-3xl font-bold text-slate-900 tracking-tight">Login MGMP</h2>
-          <p className="text-slate-500 mt-2">Masuk ke akun MGMP Pendidikan Pancasila Anda.</p>
+          <div className="flex justify-center mb-6">
+            <img
+              src="https://lh3.googleusercontent.com/d/1jwoFQNLORP7hnnZqjoEoK27yavygL6Fb"
+              alt="MGMP Logo"
+              className="h-20 w-20 object-contain rounded-full border-2 border-slate-100 p-1 bg-white shadow-lg"
+              referrerPolicy="no-referrer"
+            />
+          </div>
+          <h2 className="text-3xl font-black text-primary tracking-tight">Login MGMP</h2>
+          <p className="text-slate-500 mt-2 font-medium">Masuk ke akun MGMP Pendidikan Pancasila Anda.</p>
         </div>
 
         {error && (
-          <div className="p-4 bg-red-50 border border-red-100 rounded-lg flex items-center text-red-600 text-sm">
+          <div className="p-4 bg-red-50 border border-red-100 rounded-xl flex items-center text-red-600 text-sm font-medium">
             <AlertCircle className="w-4 h-4 mr-2 flex-shrink-0" />
             {error}
           </div>
@@ -104,37 +114,37 @@ const Login: React.FC = () => {
         <div className="space-y-4">
           <form onSubmit={handleLogin} className="space-y-6">
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-slate-700">Email</label>
+              <label className="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Email</label>
               <input
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all"
+                className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-medium"
                 placeholder="nama@email.com"
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-slate-700">Password</label>
+              <label className="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Password</label>
               <input
                 type="password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all"
+                className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-medium"
                 placeholder="••••••••"
               />
             </div>
             <div className="flex items-center justify-between">
-              <label className="flex items-center text-sm text-slate-600 cursor-pointer">
-                <input type="checkbox" className="mr-2 rounded border-slate-300 text-slate-900 focus:ring-slate-900" />
+              <label className="flex items-center text-sm text-slate-600 cursor-pointer font-medium">
+                <input type="checkbox" className="mr-2 rounded border-slate-300 text-primary focus:ring-primary" />
                 Ingat Password
               </label>
             </div>
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-slate-900 text-white font-bold rounded-lg hover:bg-slate-800 transition-colors disabled:opacity-50 flex items-center justify-center"
+              className="w-full py-4 bg-primary text-white font-black rounded-xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 disabled:opacity-50 flex items-center justify-center uppercase tracking-widest text-sm"
             >
               {loading ? 'Memproses...' : (
                 <>
@@ -149,24 +159,24 @@ const Login: React.FC = () => {
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-slate-200"></div>
             </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-white px-2 text-slate-500">Atau masuk dengan</span>
+            <div className="relative flex justify-center text-[10px] font-bold uppercase tracking-widest">
+              <span className="bg-white px-4 text-slate-400">Atau masuk dengan</span>
             </div>
           </div>
 
           <button
             onClick={handleGoogleLogin}
             disabled={loading}
-            className="w-full py-3 bg-white border border-slate-200 text-slate-700 font-semibold rounded-lg hover:bg-slate-50 transition-colors flex items-center justify-center"
+            className="w-full py-4 bg-white border-2 border-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition-all flex items-center justify-center shadow-sm"
           >
-            <Globe className="w-4 h-4 mr-2 text-blue-600" />
-            Google
+            <Globe className="w-5 h-5 mr-3 text-blue-600" />
+            Google Account
           </button>
         </div>
 
-        <div className="text-center text-sm text-slate-500">
+        <div className="text-center text-sm text-slate-500 font-medium">
           Belum punya akun?{' '}
-          <Link to="/register" className="text-slate-900 font-bold hover:underline">
+          <Link to="/register" className="text-primary font-black hover:underline">
             Daftar Sekarang
           </Link>
         </div>

@@ -8,6 +8,8 @@
         "uid": { "type": "string" },
         "email": { "type": "string", "format": "email" },
         "name": { "type": "string" },
+        "school": { "type": "string" },
+        "photoUrl": { "type": "string", "format": "uri" },
         "role": { "type": "string", "enum": ["admin", "teacher"] },
         "isVerified": { "type": "boolean" }
       },
@@ -106,12 +108,16 @@
         "title": { "type": "string" },
         "description": { "type": "string" },
         "driveUrl": { "type": "string", "format": "uri" },
+        "imageUrl": { "type": "string", "format": "uri" },
         "category": { "type": "string", "enum": ["Metode Pembelajaran Kreatif", "Media Ajar Inovatif", "Administrasi & Modul", "Video Praktik Baik"] },
         "fileType": { "type": "string", "enum": ["PDF", "DOCX", "PPT", "Folder", "Video", "Lainnya"] },
         "authorId": { "type": "string" },
         "authorName": { "type": "string" },
+        "authorPhotoUrl": { "type": "string", "format": "uri" },
         "createdAt": { "type": "string", "format": "date-time" },
-        "isApproved": { "type": "boolean" }
+        "isApproved": { "type": "boolean" },
+        "rating": { "type": "number" },
+        "ratingCount": { "type": "integer" }
       },
       "required": ["title", "description", "driveUrl", "category", "fileType", "authorId", "authorName", "createdAt", "isApproved"]
     },

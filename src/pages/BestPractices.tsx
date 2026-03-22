@@ -357,7 +357,17 @@ const BestPractices: React.FC = () => {
                         <h3 className="text-xl font-bold text-slate-900 line-clamp-2">{practice.title}</h3>
                         <div className="flex flex-wrap items-center justify-between mt-1 gap-2">
                           <p className="text-slate-500 text-xs flex items-center">
-                            <User className="w-3 h-3 mr-1" /> {practice.authorName} • <Clock className="w-3 h-3 mx-1" /> {formatDate(practice.createdAt)}
+                            {practice.authorPhotoUrl ? (
+                              <img 
+                                src={getDirectImageUrl(practice.authorPhotoUrl) || ''} 
+                                alt={practice.authorName}
+                                className="w-5 h-5 rounded-full object-cover mr-2 border border-slate-200"
+                                referrerPolicy="no-referrer"
+                              />
+                            ) : (
+                              <User className="w-3 h-3 mr-1" />
+                            )}
+                            {practice.authorName} • <Clock className="w-3 h-3 mx-1" /> {formatDate(practice.createdAt)}
                           </p>
                           <StarRating 
                             practiceId={practice.id} 

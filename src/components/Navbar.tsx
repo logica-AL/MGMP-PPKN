@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Menu, X, LogIn, LogOut, LayoutDashboard, User } from 'lucide-react';
 import { useAuth } from '../AuthContext';
 import { auth } from '../firebase';
-import { cn } from '../utils';
+import { cn, getDirectImageUrl } from '../utils';
 
 const Navbar: React.FC = () => {
   const { user, profile, isAdmin } = useAuth();
@@ -33,21 +33,21 @@ const Navbar: React.FC = () => {
   };
 
   return (
-    <nav className="bg-white border-b border-slate-200 sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-20">
+    <nav className="fixed top-4 left-4 right-4 z-50 flex justify-center">
+      <div className="w-full max-w-7xl glass-nav rounded-2xl px-4 sm:px-6 lg:px-8 shadow-2xl">
+        <div className="flex justify-between h-16 items-center">
           <div className="flex items-center">
             <Link to="/" className="flex-shrink-0 flex items-center">
               <img
                 src="https://lh3.googleusercontent.com/d/1jwoFQNLORP7hnnZqjoEoK27yavygL6Fb"
                 alt="MGMP Logo"
-                className="h-12 w-12 object-contain rounded-full border-2 border-slate-100 p-0.5 bg-white"
+                className="h-10 w-10 object-contain rounded-full border border-white/20 p-0.5 bg-white/10 backdrop-blur-sm"
                 referrerPolicy="no-referrer"
               />
               <div className="ml-3 flex flex-col">
-                <span className="text-xl font-black text-slate-900 leading-none tracking-tight">MGMP</span>
-                <span className="text-sm font-bold text-slate-800 leading-tight">Pendidikan Pancasilla</span>
-                <span className="text-[10px] font-semibold text-slate-500 hidden sm:block uppercase tracking-wider">
+                <span className="text-lg font-black text-white leading-none tracking-tight">MGMP</span>
+                <span className="text-xs font-bold text-white/90 leading-tight">Pendidikan Pancasilla</span>
+                <span className="text-[8px] font-semibold text-white/60 hidden sm:block uppercase tracking-wider">
                   SMP Se-kabupaten Mojokerto
                 </span>
               </div>
@@ -55,16 +55,16 @@ const Navbar: React.FC = () => {
           </div>
 
           {/* Desktop Nav */}
-          <div className="hidden md:flex items-center space-x-6">
+          <div className="hidden lg:flex items-center space-x-4">
             {navLinks.map((link) => (
               <Link
                 key={link.name}
                 to={link.path}
                 className={cn(
-                  "text-sm transition-colors",
+                  "text-[11px] transition-colors uppercase tracking-wider",
                   isActive(link.path)
-                    ? "text-slate-900 font-black"
-                    : "text-slate-600 hover:text-slate-900 font-medium"
+                    ? "text-white font-black border-b-2 border-accent"
+                    : "text-white/70 hover:text-white font-medium"
                 )}
               >
                 {link.name}
@@ -72,38 +72,52 @@ const Navbar: React.FC = () => {
             ))}
             
             {user ? (
-              <div className="flex items-center space-x-4 ml-4 pl-4 border-l border-slate-200">
+              <div className="flex items-center space-x-3 ml-2 pl-4 border-l border-white/10">
                 <Link
                   to="/dashboard"
-                  className="flex items-center text-slate-600 hover:text-slate-900 text-sm font-medium"
+                  className="flex items-center space-x-2 group"
                 >
-                  <LayoutDashboard className="w-4 h-4 mr-1" />
-                  Dashboard
+                  {profile?.photoUrl ? (
+                    <img 
+                      src={getDirectImageUrl(profile.photoUrl) || ''} 
+                      alt={profile.name}
+                      className="w-8 h-8 rounded-full object-cover border border-white/20"
+                      referrerPolicy="no-referrer"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center border border-white/20">
+                      <User className="w-4 h-4 text-white/60" />
+                    </div>
+                  )}
+                  <div className="flex flex-col">
+                    <span className="text-[10px] font-bold text-white leading-none group-hover:text-accent transition-colors">{profile?.name}</span>
+                    <span className="text-[8px] text-white/50 font-medium">Dashboard</span>
+                  </div>
                 </Link>
                 <button
                   onClick={handleLogout}
-                  className="flex items-center text-slate-600 hover:text-red-600 text-sm font-medium"
+                  className="flex items-center text-white/70 hover:text-red-400 text-[10px] font-bold uppercase tracking-wider"
                 >
-                  <LogOut className="w-4 h-4 mr-1" />
+                  <LogOut className="w-3 h-3 mr-1" />
                   Keluar
                 </button>
               </div>
             ) : (
               <Link
                 to="/login"
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-slate-900 hover:bg-slate-800 transition-colors"
+                className="inline-flex items-center px-4 py-1.5 border border-white/20 text-[10px] font-bold uppercase tracking-wider rounded-full text-white bg-white/10 hover:bg-white/20 transition-colors"
               >
-                <LogIn className="w-4 h-4 mr-2" />
+                <LogIn className="w-3 h-3 mr-2" />
                 Masuk
               </Link>
             )}
           </div>
 
           {/* Mobile menu button */}
-          <div className="md:hidden flex items-center">
+          <div className="lg:hidden flex items-center">
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="inline-flex items-center justify-center p-2 rounded-md text-slate-400 hover:text-slate-500 hover:bg-slate-100 focus:outline-none"
+              className="inline-flex items-center justify-center p-2 rounded-md text-white/70 hover:text-white hover:bg-white/10 focus:outline-none"
             >
               {isOpen ? <X className="block h-6 w-6" /> : <Menu className="block h-6 w-6" />}
             </button>
@@ -112,18 +126,18 @@ const Navbar: React.FC = () => {
       </div>
 
       {/* Mobile Nav */}
-      <div className={cn("md:hidden", isOpen ? "block" : "hidden")}>
-        <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-b border-slate-200">
+      <div className={cn("lg:hidden absolute top-20 left-4 right-4", isOpen ? "block" : "hidden")}>
+        <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 glass-nav rounded-2xl shadow-2xl">
           {navLinks.map((link) => (
             <Link
               key={link.name}
               to={link.path}
               onClick={() => setIsOpen(false)}
               className={cn(
-                "block px-3 py-2 rounded-md text-base transition-colors",
+                "block px-3 py-2 rounded-md text-sm transition-colors uppercase tracking-wider",
                 isActive(link.path)
-                  ? "text-slate-900 font-black bg-slate-50"
-                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-50 font-medium"
+                  ? "text-white font-black bg-white/10"
+                  : "text-white/70 hover:text-white hover:bg-white/10 font-medium"
               )}
             >
               {link.name}
@@ -134,7 +148,7 @@ const Navbar: React.FC = () => {
               <Link
                 to="/dashboard"
                 onClick={() => setIsOpen(false)}
-                className="block px-3 py-2 rounded-md text-base font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                className="block px-3 py-2 rounded-md text-sm font-bold text-white/70 hover:text-white hover:bg-white/10 uppercase tracking-wider"
               >
                 Dashboard
               </Link>
@@ -143,7 +157,7 @@ const Navbar: React.FC = () => {
                   handleLogout();
                   setIsOpen(false);
                 }}
-                className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-red-600 hover:bg-red-50"
+                className="block w-full text-left px-3 py-2 rounded-md text-sm font-bold text-red-400 hover:bg-red-400/10 uppercase tracking-wider"
               >
                 Keluar
               </button>
@@ -152,7 +166,7 @@ const Navbar: React.FC = () => {
             <Link
               to="/login"
               onClick={() => setIsOpen(false)}
-              className="block px-3 py-2 rounded-md text-base font-medium text-slate-900 hover:bg-slate-50"
+              className="block px-3 py-2 rounded-md text-sm font-bold text-white hover:bg-white/10 uppercase tracking-wider"
             >
               Masuk
             </Link>

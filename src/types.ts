@@ -9,6 +9,7 @@ export interface UserProfile {
   role: UserRole;
   isVerified: boolean;
   school?: string;
+  photoUrl?: string;
 }
 
 export interface NewsArticle {
@@ -84,6 +85,7 @@ export interface BestPractice {
   fileType: BestPracticeFileType;
   authorId: string;
   authorName: string;
+  authorPhotoUrl?: string;
   createdAt: Timestamp;
   isApproved: boolean;
   rating?: number;

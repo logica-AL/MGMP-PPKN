@@ -3,7 +3,7 @@ import { collection, query, where, onSnapshot, doc, updateDoc, deleteDoc, addDoc
 import { db } from '../firebase';
 import { UserProfile, NewsArticle, StaffMember, TeacherEvent, EducationalMaterial, SiteSettings, Documentation, BestPractice } from '../types';
 import { useAuth } from '../AuthContext';
-import { Check, X, Trash2, Plus, UserCheck, FileText, Users as UsersIcon, Calendar, BookOpen, Settings as SettingsIcon, Camera, MessageSquare } from 'lucide-react';
+import { Check, X, Trash2, Plus, UserCheck, FileText, Users as UsersIcon, Calendar, BookOpen, Settings as SettingsIcon, Camera, MessageSquare, User } from 'lucide-react';
 import { formatDate, handleFirestoreError, OperationType, getDirectImageUrl } from '../utils';
 
 const AdminDashboard: React.FC = () => {
@@ -22,7 +22,7 @@ const AdminDashboard: React.FC = () => {
   const [staff, setStaff] = useState<StaffMember[]>([]);
   const [allUsers, setAllUsers] = useState<UserProfile[]>([]);
   const [settings, setSettings] = useState<SiteSettings | null>(null);
-  const [activeTab, setActiveTab] = useState<'verification' | 'moderation' | 'staff' | 'users' | 'all-news' | 'all-events' | 'all-materials' | 'all-docs' | 'all-best-practices' | 'settings'>('verification');
+  const [activeTab, setActiveTab] = useState<'verification' | 'moderation' | 'staff' | 'users' | 'all-news' | 'all-events' | 'all-materials' | 'all-docs' | 'all-best-practices' | 'settings' | 'profile'>('verification');
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
   // New Staff Form State
@@ -34,6 +34,23 @@ const AdminDashboard: React.FC = () => {
     mission: '',
     history: ''
   });
+
+  // Profile Form State
+  const [profileForm, setProfileForm] = useState({
+    name: profile?.name || '',
+    school: profile?.school || '',
+    photoUrl: profile?.photoUrl || ''
+  });
+
+  useEffect(() => {
+    if (profile) {
+      setProfileForm({
+        name: profile.name,
+        school: profile.school || '',
+        photoUrl: profile.photoUrl || ''
+      });
+    }
+  }, [profile]);
 
   const showToast = (message: string, type: 'success' | 'error' = 'success') => {
     setToast({ message, type });
@@ -377,6 +394,22 @@ const AdminDashboard: React.FC = () => {
     }
   };
 
+  const handleUpdateProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!profile?.uid) return;
+    try {
+      await updateDoc(doc(db, 'profiles', profile.uid), {
+        name: profileForm.name,
+        school: profileForm.school,
+        photoUrl: profileForm.photoUrl
+      });
+      showToast('Profil berhasil diperbarui');
+    } catch (error) {
+      handleFirestoreError(error, OperationType.WRITE, `profiles/${profile.uid}`);
+      showToast('Gagal memperbarui profil', 'error');
+    }
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 py-12 space-y-12">
       {toast && (
@@ -454,6 +487,13 @@ const AdminDashboard: React.FC = () => {
           >
             <UsersIcon className="w-4 h-4 inline-block mr-2" />
             Kelola Pengurus
+          </button>
+          <button
+            onClick={() => setActiveTab('profile')}
+            className={`px-4 py-2 text-sm font-bold rounded-md transition-colors ${activeTab === 'profile' ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-50'}`}
+          >
+            <User className="w-4 h-4 inline-block mr-2" />
+            Profil Saya
           </button>
           <button
             onClick={() => setActiveTab('users')}
@@ -1165,7 +1205,23 @@ const AdminDashboard: React.FC = () => {
               <tbody className="divide-y divide-slate-100">
                 {allUsers.map((user) => (
                   <tr key={user.uid} className="hover:bg-slate-50 transition-colors">
-                    <td className="px-6 py-4 font-medium text-slate-900">{user.name}</td>
+                    <td className="px-6 py-4 font-medium text-slate-900">
+                      <div className="flex items-center space-x-3">
+                        {user.photoUrl ? (
+                          <img 
+                            src={getDirectImageUrl(user.photoUrl) || ''} 
+                            alt={user.name}
+                            className="w-8 h-8 rounded-full object-cover border border-slate-200"
+                            referrerPolicy="no-referrer"
+                          />
+                        ) : (
+                          <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center border border-slate-200">
+                            <User className="w-4 h-4 text-slate-400" />
+                          </div>
+                        )}
+                        <span>{user.name}</span>
+                      </div>
+                    </td>
                     <td className="px-6 py-4 text-slate-500">{user.email}</td>
                     <td className="px-6 py-4 text-slate-500">{user.school || '-'}</td>
                     <td className="px-6 py-4">
@@ -1208,6 +1264,52 @@ const AdminDashboard: React.FC = () => {
             </table>
           </div>
         </div>
+      )}
+
+      {activeTab === 'profile' && (
+        <form onSubmit={handleUpdateProfile} className="bg-white rounded-2xl shadow-sm border border-slate-100 p-10 space-y-6">
+          <h2 className="text-xl font-bold text-slate-900">Pengaturan Profil</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-slate-700">Nama Lengkap</label>
+              <input
+                type="text"
+                required
+                value={profileForm.name}
+                onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })}
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-slate-700">Asal Sekolah</label>
+              <input
+                type="text"
+                required
+                value={profileForm.school}
+                onChange={(e) => setProfileForm({ ...profileForm, school: e.target.value })}
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900"
+              />
+            </div>
+            <div className="space-y-2 md:col-span-2">
+              <label className="text-sm font-semibold text-slate-700">URL Foto Profil (Wajib Google Drive)</label>
+              <input
+                type="text"
+                value={profileForm.photoUrl}
+                onChange={(e) => setProfileForm({ ...profileForm, photoUrl: e.target.value })}
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900"
+                placeholder="https://drive.google.com/..."
+              />
+              <p className="text-[10px] text-slate-400">Wajib menggunakan link dari Google Drive.</p>
+            </div>
+          </div>
+          <button
+            type="submit"
+            className="w-full py-4 bg-slate-900 text-white font-bold rounded-lg hover:bg-slate-800 transition-colors flex items-center justify-center"
+          >
+            <Check className="w-4 h-4 mr-2" />
+            Simpan Perubahan
+          </button>
+        </form>
       )}
     </div>
   );
