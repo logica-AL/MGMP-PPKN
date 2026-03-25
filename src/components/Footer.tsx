@@ -20,7 +20,7 @@ const Footer: React.FC = () => {
               </div>
             </div>
             <p className="text-sm leading-relaxed max-w-md">
-              Wadah kolaborasi dan peningkatan profesionalisme guru PPKN SMP Kabupaten Mojokerto. 
+              Wadah kolaborasi dan peningkatan profesionalisme guru Pendidikan Pancasila SMP Kabupaten Mojokerto. 
               Berkomitmen untuk mencetak generasi bangsa yang berkarakter Pancasila.
             </p>
           </div>

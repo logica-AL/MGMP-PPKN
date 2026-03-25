@@ -73,11 +73,11 @@ const Home: React.FC = () => {
               Pendidikan Pancasila
             </h1>
             <p className="text-2xl md:text-4xl font-serif italic text-white/90 drop-shadow-md">
-              SMP Se-kabupaten Mojokerto
+              SMP Kabupaten Mojokerto
             </p>
             <div className="w-24 h-1 bg-accent mx-auto my-6 rounded-full shadow-[0_0_10px_rgba(184,134,11,0.5)]"></div>
             <p className="text-lg md:text-xl text-white/80 max-w-3xl mx-auto font-medium leading-relaxed drop-shadow-sm">
-              Wadah kolaborasi dan peningkatan profesionalisme guru PPKN SMP Kabupaten Mojokerto.
+              Wadah kolaborasi dan peningkatan profesionalisme guru Pendidikan Pancasila SMP Kabupaten Mojokerto.
             </p>
           </div>
 
@@ -154,7 +154,7 @@ const Home: React.FC = () => {
             </div>
             <h3 className="text-2xl font-bold mb-4 text-slate-800">Komunitas Guru</h3>
             <p className="text-slate-600 leading-relaxed font-medium">
-              Terhubung dengan Guru pengampu mata pelajaran Pendidikan Pancasila SMP Se-Kabupaten Mojokerto.
+              Terhubung dengan Guru pengampu mata pelajaran Pendidikan Pancasila SMP Kabupaten Mojokerto.
             </p>
           </div>
         </div>

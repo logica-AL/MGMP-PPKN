@@ -46,9 +46,9 @@ const Navbar: React.FC = () => {
               />
               <div className="ml-3 flex flex-col">
                 <span className="text-lg font-black text-white leading-none tracking-tight">MGMP</span>
-                <span className="text-xs font-bold text-white/90 leading-tight">Pendidikan Pancasilla</span>
+                <span className="text-xs font-bold text-white/90 leading-tight">Pendidikan Pancasila</span>
                 <span className="text-[8px] font-semibold text-white/60 hidden sm:block uppercase tracking-wider">
-                  SMP Se-kabupaten Mojokerto
+                  SMP Kabupaten Mojokerto
                 </span>
               </div>
             </Link>
