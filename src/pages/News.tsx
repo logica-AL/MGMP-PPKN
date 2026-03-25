@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { collection, query, where, orderBy, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 import { NewsArticle } from '../types';
@@ -28,6 +29,11 @@ const News: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-20 space-y-16">
+      <Helmet>
+        <title>Berita Pendidikan - MGMP Pendidikan Pancasila Mojokerto</title>
+        <meta name="description" content="Kumpulan berita dan artikel informatif seputar dunia pendidikan, keguruan, dan kegiatan MGMP Pendidikan Pancasila SMP Kabupaten Mojokerto." />
+        <link rel="canonical" href={`${window.location.origin}/berita`} />
+      </Helmet>
       <div className="text-center space-y-4">
         <h1 className="text-4xl font-bold text-slate-900 tracking-tight">Berita Pendidikan</h1>
         <p className="text-slate-500 max-w-2xl mx-auto">

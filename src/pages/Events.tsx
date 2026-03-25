@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { collection, query, orderBy, onSnapshot, where } from 'firebase/firestore';
 import { db } from '../firebase';
 import { TeacherEvent } from '../types';
@@ -23,6 +24,11 @@ const Events: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-20 space-y-16">
+      <Helmet>
+        <title>Acara & Workshop - MGMP Pendidikan Pancasila Mojokerto</title>
+        <meta name="description" content="Daftar acara, workshop, dan seminar pendidikan untuk guru Pendidikan Pancasila SMP Kabupaten Mojokerto." />
+        <link rel="canonical" href={`${window.location.origin}/acara`} />
+      </Helmet>
       <div className="text-center space-y-4">
         <h1 className="text-4xl font-bold text-slate-900 tracking-tight">Acara & Workshop</h1>
         <p className="text-slate-500 max-w-2xl mx-auto">

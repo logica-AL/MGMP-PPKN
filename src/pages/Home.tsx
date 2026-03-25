@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { collection, query, where, orderBy, limit, onSnapshot, doc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { NewsArticle, SiteSettings } from '../types';
@@ -45,6 +46,12 @@ const Home: React.FC = () => {
 
   return (
     <div className="pb-20">
+      <Helmet>
+        <title>MGMP Pendidikan Pancasila SMP Kabupaten Mojokerto</title>
+        <meta name="description" content="Wadah kolaborasi dan peningkatan profesionalisme guru Pendidikan Pancasila SMP Kabupaten Mojokerto. Berkomitmen untuk mencetak generasi bangsa yang berkarakter Pancasila." />
+        <meta name="keywords" content="MGMP, Pendidikan Pancasila, SMP, Mojokerto, Guru, Pendidikan, Pancasila" />
+        <link rel="canonical" href={window.location.origin} />
+      </Helmet>
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-slate-900 pt-20 pb-32 md:pb-48">
         <div className="absolute inset-0">
