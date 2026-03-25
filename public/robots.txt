@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://ais-pre-kkmwoqrufsca5fldxdvytt-728787364880.run.app/sitemap.xml
+Sitemap: https://mgmp-ppkn-smp-mojokerto.netlify.app/sitemap.xml
