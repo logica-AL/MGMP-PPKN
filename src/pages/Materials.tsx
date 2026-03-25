@@ -2,14 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { collection, query, orderBy, onSnapshot, where } from 'firebase/firestore';
 import { db } from '../firebase';
 import { EducationalMaterial } from '../types';
-import { useAuth } from '../AuthContext';
-import { FileText, Download, Lock } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { FileText, Download } from 'lucide-react';
 import { handleFirestoreError, OperationType } from '../utils';
 
 const Materials: React.FC = () => {
   const [materials, setMaterials] = useState<EducationalMaterial[]>([]);
-  const { user } = useAuth();
 
   useEffect(() => {
     const path = 'materials';
@@ -46,25 +43,15 @@ const Materials: React.FC = () => {
                 Diunggah oleh: {material.authorName}
               </p>
               
-              {user ? (
-                <a
-                  href={material.fileUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center px-6 py-3 bg-slate-900 text-white text-sm font-bold rounded-lg hover:bg-slate-800 transition-colors"
-                >
-                  <Download className="w-4 h-4 mr-2" />
-                  Unduh File
-                </a>
-              ) : (
-                <Link
-                  to="/login"
-                  className="inline-flex items-center justify-center px-6 py-3 bg-slate-100 text-slate-400 text-sm font-bold rounded-lg cursor-not-allowed"
-                >
-                  <Lock className="w-4 h-4 mr-2" />
-                  Masuk untuk Unduh
-                </Link>
-              )}
+              <a
+                href={material.fileUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center px-6 py-3 bg-slate-900 text-white text-sm font-bold rounded-lg hover:bg-slate-800 transition-colors"
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Unduh File
+              </a>
             </div>
           ))
         ) : (

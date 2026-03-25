@@ -67,7 +67,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, []);
 
-  const isAdmin = (profile?.role === 'admin' || user?.email === 'logicafalfa21@gmail.com') && (user?.email !== 'logicafalfa21@gmail.com' || user?.emailVerified);
+  const isAdmin = profile?.role === 'admin' || user?.email === 'logicafalfa21@gmail.com';
   const isVerifiedTeacher = profile?.role === 'teacher' && profile?.isVerified === true;
 
   return (

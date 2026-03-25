@@ -1,10 +1,10 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { collection, query, where, orderBy, onSnapshot, addDoc, Timestamp, limit, doc, updateDoc, getDoc, setDoc } from 'firebase/firestore';
+import { collection, query, where, orderBy, onSnapshot, addDoc, Timestamp, limit, doc, updateDoc, getDoc, setDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../AuthContext';
 import { BestPractice, BestPracticeMessage, BestPracticeCategory, BestPracticeComment } from '../types';
 import { formatDate, handleFirestoreError, OperationType } from '../utils';
-import { Send, MessageSquare, ExternalLink, User, Clock, AlertCircle, FileText, Folder, Video, FileCode, FileQuestion, Copy, ChevronDown, ChevronUp, Star } from 'lucide-react';
+import { Send, MessageSquare, ExternalLink, User, Clock, AlertCircle, FileText, Folder, Video, FileCode, FileQuestion, Copy, ChevronDown, ChevronUp, Star, Trash2, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -16,7 +16,7 @@ const CATEGORIES: BestPracticeCategory[] = [
 ];
 
 const BestPractices: React.FC = () => {
-  const { user, profile } = useAuth();
+  const { user, profile, isAdmin } = useAuth();
   const [practices, setPractices] = useState<BestPractice[]>([]);
   const [messages, setMessages] = useState<BestPracticeMessage[]>([]);
   const [comments, setComments] = useState<Record<string, BestPracticeComment[]>>({});
@@ -24,9 +24,9 @@ const BestPractices: React.FC = () => {
   const [newMessage, setNewMessage] = useState('');
   const [newComments, setNewComments] = useState<Record<string, string>>({});
   const [expandedComments, setExpandedComments] = useState<Record<string, boolean>>({});
-  const [expandedDescriptions, setExpandedDescriptions] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(true);
   const [userRatings, setUserRatings] = useState<Record<string, number>>({});
+  const [selectedPractice, setSelectedPractice] = useState<BestPractice | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -124,6 +124,28 @@ const BestPractices: React.FC = () => {
     } catch (error) {
       handleFirestoreError(error, OperationType.WRITE, 'best_practice_messages');
       toast.error('Gagal mengirim pesan');
+    }
+  };
+
+  const handleDeleteMessage = async (messageId: string) => {
+    const loadingToast = toast.loading('Menghapus pesan...');
+    try {
+      await deleteDoc(doc(db, 'best_practice_messages', messageId));
+      toast.success('Pesan dihapus', { id: loadingToast });
+    } catch (error) {
+      handleFirestoreError(error, OperationType.DELETE, `best_practice_messages/${messageId}`);
+      toast.error('Gagal menghapus pesan', { id: loadingToast });
+    }
+  };
+
+  const handleDeleteComment = async (commentId: string) => {
+    const loadingToast = toast.loading('Menghapus komentar...');
+    try {
+      await deleteDoc(doc(db, 'best_practice_comments', commentId));
+      toast.success('Komentar dihapus', { id: loadingToast });
+    } catch (error) {
+      handleFirestoreError(error, OperationType.DELETE, `best_practice_comments/${commentId}`);
+      toast.error('Gagal menghapus komentar', { id: loadingToast });
     }
   };
 
@@ -380,19 +402,15 @@ const BestPractices: React.FC = () => {
                       </div>
 
                       <div className="space-y-2">
-                        <p className={`text-slate-600 text-sm leading-relaxed ${!expandedDescriptions[practice.id] ? 'line-clamp-3' : ''}`}>
+                        <p className="text-slate-600 text-sm leading-relaxed line-clamp-3">
                           {practice.description}
                         </p>
-                        {practice.description && practice.description.length > 150 && (
+                        {practice.description && practice.description.length > 50 && (
                           <button 
-                            onClick={() => setExpandedDescriptions(prev => ({ ...prev, [practice.id]: !prev[practice.id] }))}
+                            onClick={() => setSelectedPractice(practice)}
                             className="text-blue-600 text-xs font-bold hover:underline flex items-center"
                           >
-                            {expandedDescriptions[practice.id] ? (
-                              <>Sembunyikan <ChevronUp className="w-3 h-3 ml-1" /></>
-                            ) : (
-                              <>Selengkapnya <ChevronDown className="w-3 h-3 ml-1" /></>
-                            )}
+                            Baca Selengkapnya <ChevronDown className="w-3 h-3 ml-1" />
                           </button>
                         )}
                       </div>
@@ -441,9 +459,20 @@ const BestPractices: React.FC = () => {
                             <div className="px-6 pb-6 space-y-4">
                               <div className="max-h-40 overflow-y-auto space-y-3 pr-2 scrollbar-thin">
                                 {comments[practice.id]?.map(comment => (
-                                  <div key={comment.id} className="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm">
+                                  <div key={comment.id} className="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm group">
                                     <div className="flex justify-between items-center mb-1">
-                                      <span className="text-[10px] font-bold text-slate-900">{comment.userName}</span>
+                                      <div className="flex items-center space-x-2">
+                                        <span className="text-[10px] font-bold text-slate-900">{comment.userName}</span>
+                                        {(isAdmin || comment.userId === user?.uid) && (
+                                          <button 
+                                            onClick={() => handleDeleteComment(comment.id)}
+                                            className="p-0.5 text-slate-300 hover:text-red-500"
+                                            title="Hapus komentar"
+                                          >
+                                            <Trash2 className="w-2.5 h-2.5" />
+                                          </button>
+                                        )}
+                                      </div>
                                       <span className="text-[10px] text-slate-400">{formatDate(comment.createdAt)}</span>
                                     </div>
                                     <p className="text-xs text-slate-600 leading-relaxed">{comment.content}</p>
@@ -582,9 +611,18 @@ const BestPractices: React.FC = () => {
 
               <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50/30 scrollbar-thin">
                 {messages.map((msg) => (
-                  <div key={msg.id} className={`flex flex-col ${msg.userId === user?.uid ? 'items-end' : 'items-start'}`}>
+                  <div key={msg.id} className={`flex flex-col group ${msg.userId === user?.uid ? 'items-end' : 'items-start'}`}>
                     <div className="flex items-center space-x-2 mb-0.5">
                       <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wider">{msg.userName}</span>
+                      {(isAdmin || msg.userId === user?.uid) && (
+                        <button 
+                          onClick={() => handleDeleteMessage(msg.id)}
+                          className="p-0.5 text-slate-300 hover:text-red-500"
+                          title="Hapus pesan"
+                        >
+                          <Trash2 className="w-2.5 h-2.5" />
+                        </button>
+                      )}
                     </div>
                     <div className={`max-w-[90%] p-2 rounded-xl text-[11px] leading-relaxed ${
                       msg.userId === user?.uid 
@@ -624,6 +662,112 @@ const BestPractices: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Modal Baca Selengkapnya */}
+      <AnimatePresence>
+        {selectedPractice && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSelectedPractice(null)}
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col"
+            >
+              <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-white rounded-xl shadow-sm">
+                    {getFileIcon(selectedPractice.fileType)}
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-bold text-slate-900 line-clamp-1">{selectedPractice.title}</h2>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{selectedPractice.category}</p>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setSelectedPractice(null)}
+                  className="p-2 hover:bg-white rounded-full transition-colors text-slate-400 hover:text-slate-900 shadow-sm"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-8 space-y-6">
+                {selectedPractice.imageUrl && (
+                  <div className="rounded-2xl overflow-hidden shadow-md border border-slate-100">
+                    <img 
+                      src={getDirectImageUrl(selectedPractice.imageUrl) || ''} 
+                      alt={selectedPractice.title}
+                      className="w-full h-auto"
+                      referrerPolicy="no-referrer"
+                    />
+                  </div>
+                )}
+
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between py-3 border-y border-slate-50">
+                    <div className="flex items-center">
+                      {selectedPractice.authorPhotoUrl ? (
+                        <img 
+                          src={getDirectImageUrl(selectedPractice.authorPhotoUrl) || ''} 
+                          alt={selectedPractice.authorName}
+                          className="w-8 h-8 rounded-full object-cover mr-3 border border-slate-200"
+                          referrerPolicy="no-referrer"
+                        />
+                      ) : (
+                        <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center mr-3">
+                          <User className="w-4 h-4 text-slate-400" />
+                        </div>
+                      )}
+                      <div>
+                        <p className="text-xs font-bold text-slate-900">{selectedPractice.authorName}</p>
+                        <p className="text-[10px] text-slate-400">{formatDate(selectedPractice.createdAt)}</p>
+                      </div>
+                    </div>
+                    <StarRating 
+                      practiceId={selectedPractice.id} 
+                      authorId={selectedPractice.authorId}
+                      currentRating={selectedPractice.rating} 
+                      ratingCount={selectedPractice.ratingCount} 
+                    />
+                  </div>
+
+                  <div className="prose prose-slate max-w-none">
+                    <p className="text-slate-600 text-sm leading-relaxed whitespace-pre-wrap">
+                      {selectedPractice.description}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-6 border-t border-slate-100 bg-slate-50/50 grid grid-cols-2 gap-4">
+                <a 
+                  href={selectedPractice.driveUrl} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center px-6 py-3 bg-slate-900 text-white text-xs font-bold rounded-2xl hover:bg-slate-800 transition-all shadow-lg hover:shadow-slate-900/20"
+                >
+                  <ExternalLink className="w-4 h-4 mr-2" /> Buka di Drive
+                </a>
+                <a 
+                  href={getCopyUrl(selectedPractice.driveUrl)} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center px-6 py-3 bg-white text-slate-900 border border-slate-200 text-xs font-bold rounded-2xl hover:bg-slate-50 transition-all shadow-sm"
+                >
+                  <Copy className="w-4 h-4 mr-2" /> Buat Salinan
+                </a>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
