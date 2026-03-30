@@ -4,21 +4,27 @@ import { db } from '../firebase';
 import { useAuth } from '../AuthContext';
 import { FileText, Calendar, BookOpen, Send, AlertCircle, CheckCircle, Camera, MessageSquare, Star, Trash2, User as UserIcon } from 'lucide-react';
 import { BestPractice, EducationalMaterial, NewsArticle, TeacherEvent, Documentation } from '../types';
-import { formatDate } from '../utils';
+import { formatDate, handleFirestoreError, OperationType } from '../utils';
 import toast from 'react-hot-toast';
-import { handleFirestoreError, OperationType } from '../utils';
+import ConfirmModal from '../components/ConfirmModal';
 
 const TeacherDashboard: React.FC = () => {
   const { profile } = useAuth();
   const [activeForm, setActiveForm] = useState<'news' | 'event' | 'material' | 'documentation' | 'bestPractice' | 'profile' | null>(null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [confirmModal, setConfirmModal] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => {}
+  });
 
   // Form States
   const [newsForm, setNewsForm] = useState({ title: '', content: '', imageUrl: '' });
   const [eventForm, setEventForm] = useState({ title: '', description: '', date: '', location: '' });
   const [materialForm, setMaterialForm] = useState({ title: '', description: '', fileUrl: '' });
-  const [docForm, setDocForm] = useState({ title: '', description: '', imageUrls: '' });
+  const [docForm, setDocForm] = useState({ title: '', description: '', imageUrls: '', type: 'photo' as 'photo' | 'video' });
   const [bpForm, setBpForm] = useState({ 
     title: '', 
     description: '', 
@@ -96,14 +102,22 @@ const TeacherDashboard: React.FC = () => {
     };
   }, [profile?.uid]);
 
-  const handleDelete = async (coll: string, id: string) => {
-    if (!window.confirm('Apakah Anda yakin ingin menghapus konten ini?')) return;
-    try {
-      await deleteDoc(doc(db, coll, id));
-      toast.success('Konten berhasil dihapus');
-    } catch (err) {
-      handleFirestoreError(err, OperationType.DELETE, coll);
-    }
+  const handleDelete = (coll: string, id: string) => {
+    setConfirmModal({
+      isOpen: true,
+      title: 'Hapus Konten',
+      message: 'Apakah Anda yakin ingin menghapus konten ini? Tindakan ini tidak dapat dibatalkan.',
+      onConfirm: async () => {
+        try {
+          await deleteDoc(doc(db, coll, id));
+          toast.success('Konten berhasil dihapus');
+        } catch (err) {
+          handleFirestoreError(err, OperationType.DELETE, coll);
+        } finally {
+          setConfirmModal(prev => ({ ...prev, isOpen: false }));
+        }
+      }
+    });
   };
 
   const resetForms = () => {
@@ -210,6 +224,7 @@ const TeacherDashboard: React.FC = () => {
         title: docForm.title,
         description: docForm.description,
         imageUrls: urls,
+        type: docForm.type,
         authorId: profile.uid,
         authorName: profile.name,
         createdAt: Timestamp.now(),
@@ -571,6 +586,25 @@ const TeacherDashboard: React.FC = () => {
           <h2 className="text-xl font-bold text-slate-900">Unggah Dokumentasi Baru</h2>
           <div className="space-y-4">
             <div className="space-y-2">
+              <label className="text-sm font-semibold text-slate-700">Tipe Dokumentasi</label>
+              <div className="flex gap-4">
+                <button
+                  type="button"
+                  onClick={() => setDocForm({ ...docForm, type: 'photo' })}
+                  className={`flex-1 py-3 rounded-xl border font-bold transition-all ${docForm.type === 'photo' ? 'bg-slate-900 border-slate-900 text-white' : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300'}`}
+                >
+                  Galeri Foto
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDocForm({ ...docForm, type: 'video' })}
+                  className={`flex-1 py-3 rounded-xl border font-bold transition-all ${docForm.type === 'video' ? 'bg-slate-900 border-slate-900 text-white' : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300'}`}
+                >
+                  Galeri Video
+                </button>
+              </div>
+            </div>
+            <div className="space-y-2">
               <label className="text-sm font-semibold text-slate-700">Judul Kegiatan</label>
               <input
                 type="text"
@@ -844,6 +878,13 @@ const TeacherDashboard: React.FC = () => {
         </div>
       </div>
 
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        onClose={() => setConfirmModal({ ...confirmModal, isOpen: false })}
+        onConfirm={confirmModal.onConfirm}
+        title={confirmModal.title}
+        message={confirmModal.message}
+      />
     </div>
   );
 };

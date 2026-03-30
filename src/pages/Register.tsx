@@ -43,8 +43,19 @@ const Register: React.FC = () => {
 
       navigate('/dashboard');
     } catch (err: any) {
-      if (err.code === 'auth/email-already-in-use') {
-        setError('Email sudah terdaftar. Gunakan email lain.');
+      const errorMessage = err.message || '';
+      const errorCode = err.code || '';
+
+      if (errorCode === 'auth/email-already-in-use' || errorMessage.includes('email-already-in-use')) {
+        setError('Email ini sudah terdaftar. Silakan gunakan email lain atau masuk ke akun Anda.');
+      } else if (errorCode === 'auth/invalid-email' || errorMessage.includes('invalid-email')) {
+        setError('Format email tidak valid. Silakan periksa kembali.');
+      } else if (errorCode === 'auth/weak-password' || errorMessage.includes('weak-password')) {
+        setError('Password terlalu lemah. Minimal gunakan 6 karakter.');
+      } else if (errorCode === 'auth/operation-not-allowed' || errorMessage.includes('operation-not-allowed')) {
+        setError('Pendaftaran dengan email/password tidak diaktifkan.');
+      } else if (errorCode === 'auth/network-request-failed' || errorMessage.includes('network-request-failed')) {
+        setError('Koneksi internet bermasalah. Silakan periksa jaringan Anda.');
       } else {
         setError('Terjadi kesalahan saat pendaftaran. Silakan coba lagi.');
       }

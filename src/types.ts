@@ -66,6 +66,7 @@ export interface Documentation {
   title: string;
   description: string;
   imageUrls: string[];
+  type?: 'photo' | 'video';
   authorId: string;
   authorName: string;
   createdAt: Timestamp;

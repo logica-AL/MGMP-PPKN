@@ -22,12 +22,23 @@ const Login: React.FC = () => {
       await signInWithEmailAndPassword(auth, email, password);
       navigate('/dashboard');
     } catch (err: any) {
-      if (err.code === 'auth/invalid-credential') {
-        setError('Email atau password salah. Pastikan Anda sudah terdaftar.');
-      } else if (err.code === 'auth/user-not-found') {
-        setError('Akun tidak ditemukan. Silakan daftar terlebih dahulu.');
-      } else if (err.code === 'auth/wrong-password') {
-        setError('Password yang Anda masukkan salah.');
+      const errorCode = err.code || '';
+      const errorMessage = err.message || '';
+      
+      if (
+        errorCode === 'auth/invalid-credential' || 
+        errorCode === 'auth/user-not-found' || 
+        errorCode === 'auth/wrong-password' ||
+        errorMessage.includes('auth/invalid-credential') ||
+        errorMessage.includes('invalid-credential')
+      ) {
+        setError('Email atau password salah. Pastikan Anda sudah terdaftar dan memasukkan data dengan benar.');
+      } else if (errorCode === 'auth/too-many-requests') {
+        setError('Terlalu banyak percobaan login. Silakan coba lagi nanti.');
+      } else if (errorCode === 'auth/user-disabled') {
+        setError('Akun Anda telah dinonaktifkan. Silakan hubungi admin.');
+      } else if (errorCode === 'auth/network-request-failed') {
+        setError('Koneksi internet bermasalah. Silakan periksa jaringan Anda.');
       } else {
         setError('Terjadi kesalahan saat login. Silakan coba lagi.');
       }
